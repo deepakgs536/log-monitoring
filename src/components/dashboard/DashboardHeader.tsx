@@ -10,15 +10,15 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader = ({ isLive, timeRange, setTimeRange }: DashboardHeaderProps) => {
     return (
-        <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-slate-100/50 p-1 rounded-lg border border-slate-200/50">
+        <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1 bg-surface p-1.5 rounded-xl border border-border shadow-soft">
                 {TIME_RANGES.filter(r => ['1h', '24h', '7d'].includes(r.value)).map((range) => (
                     <button
                         key={range.value}
                         onClick={() => setTimeRange(range.value)}
-                        className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${timeRange === range.value
-                            ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                            : 'text-slate-400 hover:text-slate-600'
+                        className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${timeRange === range.value
+                            ? 'bg-elevated text-foreground shadow-soft border border-divider'
+                            : 'text-muted hover:text-foreground hover:bg-elevated/50'
                             }`}
                     >
                         {range.label}
@@ -26,13 +26,13 @@ export const DashboardHeader = ({ isLive, timeRange, setTimeRange }: DashboardHe
                 ))}
             </div>
 
-            <div className="h-4 w-[1px] bg-slate-200 mx-1" />
+            <div className="h-6 w-[1px] bg-divider mx-1" />
 
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] font-bold tracking-widest uppercase transition-all duration-500 ${isLive
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                : 'bg-rose-50 text-rose-700 border-rose-100'
+            <div className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border text-[10px] font-black tracking-widest uppercase transition-all duration-500 shadow-soft ${isLive
+                ? 'bg-success/10 text-success border-success/20'
+                : 'bg-error/10 text-error border-error/20'
                 }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-success animate-pulse' : 'bg-error'}`} />
                 {isLive ? 'Live System Feed' : 'Stream Paused'}
             </div>
         </div>

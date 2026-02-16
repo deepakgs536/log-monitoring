@@ -1,15 +1,38 @@
 export const THEME = {
-    appBg: '#f8fafc',
-    cardSurface: '#ffffff',
-    border: '#e2e8f0',
-    primary: '#2563eb',     // Adjusted Blue for better contrast
-    secondary: '#d97706',   // Adjusted Amber for better contrast
-    critical: '#dc2626',    // Adjusted Red for better contrast
-    success: '#059669',     // Adjusted Green for better contrast
-    textPrimary: '#020617', // Deepest Slate
-    textMuted: '#475569',   // Darker muted text
-    white: '#FFFFFF',
-    grid: '#f1f5f9'
+    // Base Palette
+    background: '#050816',
+    surface: '#0B1022',
+    card: '#121935',
+    elevated: '#182042',
+
+    // Borders & Dividers
+    border: '#242B55',
+    divider: '#1C2347',
+
+    // Text
+    textPrimary: '#F2F5FF',
+    textSecondary: '#AAB2D9',
+    textMuted: '#6B739F',
+    textDisabled: '#434A73',
+
+    // Status / Semantic
+    info: '#5B8CFF',
+    success: '#3CFF7C',
+    warning: '#FFC447',
+    error: '#FF4D6D',
+
+    // Accents
+    accentPurple: '#7A6CFF',
+    accentPink: '#FF3DAA',
+    accentCyan: '#2CE6FF',
+    accentGreen: '#3CFF7C',
+    accentYellow: '#FFC447',
+
+    // Soft / Glow Bases (for use in JS logic if needed, though mostly CSS classes)
+    infoSoft: 'rgba(91,140,255,0.12)',
+    successSoft: 'rgba(60,255,124,0.15)',
+    warningSoft: 'rgba(255,196,71,0.15)',
+    errorSoft: 'rgba(255,77,109,0.15)',
 };
 
 export const TIME_RANGES: { value: string; label: string }[] = [

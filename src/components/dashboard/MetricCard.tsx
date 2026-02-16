@@ -17,27 +17,34 @@ export const MetricCard = ({ label, value, unit, color, desc, trend, compact }: 
 
     if (compact) {
         return (
-            <div className={`p-4 rounded-2xl border border-slate-200 bg-white transition-all hover:bg-slate-50 flex-1 min-w-0 flex flex-col justify-center ${isHealth && Number(value) < 50 ? 'border-rose-200 bg-rose-50/20' : ''}`}>
-                <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">{label}</span>
+            <div
+                className={`p-6 rounded-3xl border border-border bg-card shadow-soft transition-all hover:bg-elevated hover:shadow-[0_0_20px_rgba(0,0,0,0.3)] flex-1 min-w-0 flex flex-col justify-center ${isHealth && Number(value) < 50 ? 'border-error bg-error/5' : ''}`}
+                style={{ borderColor: isHealth ? undefined : `${color}30` }} // Subtle border highlight using accent color
+            >
+                <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary truncate">{label}</span>
                     {trend && typeof trend === 'string' && (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${trend === 'Normal' || trend === 'Healthy' || trend === 'Fast' || trend === 'Optimal'
-                            ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${trend === 'Normal' || trend === 'Healthy' || trend === 'Fast' || trend === 'Optimal'
+                            ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
                             }`}>{trend}</span>
                     )}
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                    <span className={`text-xl font-bold tracking-tight text-slate-900 ${isHealth && Number(value) < 70 ? 'text-rose-600' : ''}`}>
+                <div className="flex items-baseline gap-2">
+                    <span
+                        className={`text-2xl font-bold tracking-tight text-foreground ${isHealth && Number(value) < 70 ? 'text-error' : ''}`}
+                        style={{ textShadow: `0 0 20px ${color}40` }} // Subtle text glow
+                    >
                         <AnimatedNumber value={Number(value)} />
                     </span>
-                    {unit && <span className="text-[10px] font-bold text-slate-400">{unit}</span>}
+                    {unit && <span className="text-xs font-bold text-muted">{unit}</span>}
                 </div>
+                <p className="text-[9px] font-medium text-muted mt-2 truncate">{desc}</p>
             </div>
         );
     }
 
     return (
-        <div className={`p-8 rounded-3xl border border-slate-200 bg-white shadow-soft group hover:translate-y-[-2px] transition-all duration-300 relative overflow-hidden ${isHealth && Number(value) < 50 ? 'ring-2 ring-rose-500/20' : ''}`}>
+        <div className={`p-8 rounded-3xl border border-border bg-card shadow-premium group hover:translate-y-[-2px] transition-all duration-300 relative overflow-hidden ${isHealth && Number(value) < 50 ? 'ring-2 ring-error/20' : ''}`}>
             {isHealth && (
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span className="text-4xl">🛡️</span>

@@ -4,21 +4,25 @@ import { useEffect, useState } from 'react';
 import { LogStats, TimeRange } from '@/lib/types';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricCard } from '@/components/dashboard/MetricCard';
-import { AlertPanel } from '@/components/dashboard/AlertPanel';
 import { TelemetryChart } from '@/components/dashboard/TelemetryChart';
 import { DistributionDonut } from '@/components/dashboard/DistributionDonut';
 import { LogFeedTable } from '@/components/dashboard/LogFeedTable';
 import { IncidentTimeline } from '@/components/dashboard/IncidentTimeline';
 import { SimulationControls } from '@/components/dashboard/SimulationControls';
+import { SystemHealthPanel } from '@/components/dashboard/SystemHealthPanel';
+import { DegradedBanner } from '@/components/dashboard/DegradedBanner';
 import { THEME } from '@/components/dashboard/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Terminal, ShieldAlert, Zap, ChevronUp, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+
 
 export default function Dashboard() {
     const [stats, setStats] = useState<LogStats | null>(null);
     const [timeRange, setTimeRange] = useState<TimeRange>('1h');
     const [isLive, setIsLive] = useState(true);
     const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -58,97 +62,99 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen xl:h-screen xl:overflow-hidden bg-[#f8fafc] selection:bg-blue-100">
+        <div className="flex flex-col min-h-screen bg-background selection:bg-primary/30 text-foreground">
+
             {/* Header - Fixed */}
-            <header className="h-16 flex-shrink-0 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between z-30 sticky top-0 xl:static">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
-                        <Activity className="w-6 h-6 text-blue-400" />
+            <header className="h-20 flex-shrink-0 border-b border-border bg-background/80 backdrop-blur-md px-6 flex items-center justify-between z-30 sticky top-0">
+                <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-surface rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(122,108,255,0.15)] border border-border">
+                            <Activity className="w-7 h-7 text-accent-cyan" />
+                        </div>
+                        <div className="hidden xs:block">
+                            <h1 className="text-xl font-bold text-foreground tracking-tight leading-none">LogOps Console</h1>
+                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1.5">Intelligence Layer v2.0</p>
+                        </div>
                     </div>
-                    <div className="hidden xs:block">
-                        <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">LogOps Console</h1>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Intelligence Layer v2.0</p>
-                    </div>
+                    <DashboardHeader isLive={isLive} timeRange={timeRange} setTimeRange={setTimeRange} />
                 </div>
-                <DashboardHeader isLive={isLive} timeRange={timeRange} setTimeRange={setTimeRange} />
             </header>
 
-            <div className="flex-1 flex flex-col min-h-0 bg-[#f8fafc] xl:overflow-hidden overflow-y-auto xl:overflow-y-hidden">
-                {/* Layer 1: System Overview */}
-                <section className="min-h-fit xl:h-[38vh] flex-shrink-0 border-b border-slate-200 bg-white overflow-hidden flex flex-col">
-                    <div className="p-4 xl:px-6 xl:py-4 flex-1">
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 xl:gap-6 h-full">
-                            {/* KPIs - 2x2 on mobile, 4-row on desktop */}
-                            <div className="col-span-1 md:col-span-2 xl:col-span-12">
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 xl:gap-8 mb-4 xl:mb-2">
-                                    <MetricCard
-                                        label="Health" value={stats.metrics.healthScore} unit="%" color={stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.secondary : THEME.critical}
-                                        desc="System integrity" compact
-                                    />
-                                    <MetricCard
-                                        label="TPS" value={stats.metrics.logsPerSecond} unit="LPS" color={THEME.primary}
-                                        desc="Ingestion rate" compact
-                                    />
-                                    <MetricCard
-                                        label="Error" value={(stats.metrics.errorRate * 100).toFixed(1)} unit="%" color={THEME.critical}
-                                        desc="Failure rate" compact
-                                    />
-                                    <MetricCard
-                                        label="Latency" value={stats.metrics.avgLatency} unit="ms" color={THEME.secondary}
-                                        desc="Response time" compact
-                                    />
-                                </div>
-                            </div>
+            <main className="flex-1 flex flex-col bg-background">
+                <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                    {/* Layer 0: System Reliability & Notifications */}
+                    <div className="space-y-6">
+                        <DegradedBanner metrics={stats.system} />
+                        <SystemHealthPanel metrics={stats.system} />
+                    </div>
 
+                    {/* Layer 1: System Overview */}
+                    <section className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                            <MetricCard
+                                label="Health" value={stats.metrics.healthScore} unit="%" color={stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.warning : THEME.error}
+                                desc="System integrity" compact
+                            />
+                            <MetricCard
+                                label="TPS" value={stats.metrics.logsPerSecond} unit="LPS" color={THEME.accentPurple}
+                                desc="Ingestion rate" compact
+                            />
+                            <MetricCard
+                                label="Error" value={(stats.metrics.errorRate * 100).toFixed(1)} unit="%" color={THEME.error}
+                                desc="Failure rate" compact
+                            />
+                            <MetricCard
+                                label="Latency" value={stats.metrics.avgLatency} unit="ms" color={THEME.accentCyan}
+                                desc="Response time" compact
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
                             {/* Main Overview Graphics */}
-                            <div className="col-span-1 md:col-span-2 xl:col-span-8 min-h-[300px] xl:h-[calc(100%-60px)]">
+                            <div className="xl:col-span-8 bg-card rounded-3xl border border-border shadow-soft overflow-hidden min-h-[450px]">
                                 <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
                             </div>
-                            <div className="col-span-1 md:col-span-2 xl:col-span-4 min-h-[300px] xl:h-[calc(100%-60px)]">
+                            <div className="xl:col-span-4 bg-card rounded-3xl border border-border shadow-soft overflow-hidden min-h-[450px]">
                                 <DistributionDonut data={stats.distribution} />
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Layer 2: Investigation Workspace */}
-                <section className="flex-1 min-h-fit xl:min-h-0 bg-slate-50/50 flex flex-col xl:flex-row">
-                    <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 h-full gap-0">
-                        {/* Logs Stream */}
-                        <div className="col-span-1 xl:col-span-8 flex flex-col border-b xl:border-b-0 xl:border-r border-slate-200 min-h-[500px] xl:h-full">
-                            <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center justify-between sticky top-0 z-10">
+                    {/* Layer 2: Investigation Workspace */}
+                    <section className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Terminal className="w-5 h-5 text-muted" />
+                                <h2 className="text-sm font-bold text-secondary uppercase tracking-widest">System Workspace</h2>
+                            </div>
+                            <Link
+                                href="/incidents"
+                                className="px-4 py-2 bg-surface border border-border text-foreground rounded-xl text-xs font-bold hover:bg-elevated transition-colors shadow-soft flex items-center gap-2"
+                            >
+                                <ShieldAlert className="w-4 h-4 text-accent-pink" />
+                                View Incidents
+                            </Link>
+                        </div>
+
+                        {/* Logs Stream - Full Width */}
+                        <div className="flex flex-col bg-card rounded-3xl border border-border shadow-premium overflow-hidden min-h-[600px]">
+                            <div className="px-6 py-4 border-b border-border bg-card flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Terminal className="w-4 h-4 text-slate-400" />
-                                    <h2 className="text-xs font-bold text-slate-700 uppercase tracking-widest">Live Log Stream</h2>
+                                    <div className="w-2 h-2 rounded-full bg-accent-pink animate-pulse" />
+                                    <h2 className="text-xs font-bold text-foreground uppercase tracking-widest">Live Log Stream</h2>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-blue-600 uppercase">Streaming</span>
+                                <div className="flex items-center gap-4 text-[10px] font-bold text-muted uppercase tracking-widest">
+                                    <span>Real-time Telemetry</span>
+                                    <span className="text-primary">Auto-syncing</span>
                                 </div>
                             </div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/20">
+                            <div className="flex-1 overflow-x-auto custom-scrollbar bg-card">
                                 <LogFeedTable logs={stats.recentLogs} alerts={stats.alerts} />
                             </div>
                         </div>
-
-                        {/* Incident Triage */}
-                        <div className="col-span-1 xl:col-span-4 flex flex-col xl:h-full min-h-fit xl:min-h-0">
-                            <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center gap-2 sticky top-0 z-10">
-                                <ShieldAlert className="w-4 h-4 text-slate-400" />
-                                <h2 className="text-xs font-bold text-slate-700 uppercase tracking-widest">Incident Feed</h2>
-                            </div>
-                            <div className="flex-1 overflow-y-auto xl:overflow-y-auto custom-scrollbar bg-white">
-                                <div className="p-4 space-y-6">
-                                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                                        <AlertPanel alerts={stats.alerts} />
-                                    </div>
-                                    <IncidentTimeline alerts={stats.alerts} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+                    </section>
+                </div>
+            </main>
 
             {/* Layer 3: Simulation Lab (Expandable Drawer) */}
             <div className="flex-shrink-0 z-40 bg-white border-t border-slate-200 sticky bottom-0 xl:static">

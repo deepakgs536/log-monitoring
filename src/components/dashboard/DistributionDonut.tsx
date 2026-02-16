@@ -10,17 +10,17 @@ interface DistributionDonutProps {
 export const DistributionDonut = ({ data }: DistributionDonutProps) => {
     const getChartColor = (name: string) => {
         const level = name.toLowerCase();
-        if (level === 'info') return THEME.primary;
-        if (level === 'warn') return THEME.secondary;
-        if (level === 'error') return THEME.critical;
+        if (level === 'info') return THEME.info;
+        if (level === 'warn') return THEME.warning;
+        if (level === 'error') return THEME.error;
         if (level === 'healthy') return THEME.success;
         return THEME.textMuted;
     };
 
     return (
-        <div className="bg-white p-4 xl:p-8 rounded-3xl border border-slate-200 shadow-soft relative overflow-hidden flex flex-col h-full">
-            <h2 className="text-sm xl:text-lg font-bold text-slate-900 leading-tight">Event Mix</h2>
-            <p className="text-[8px] xl:text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-0.5 mb-4 xl:mb-8">Service Health Distro</p>
+        <div className="bg-card p-4 xl:p-8 rounded-3xl border border-border shadow-soft relative overflow-hidden flex flex-col h-full">
+            <h2 className="text-sm xl:text-lg font-bold text-foreground leading-tight">Event Mix</h2>
+            <p className="text-[8px] xl:text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5 mb-4 xl:mb-8">Service Health Distro</p>
 
             <div className="flex-1 w-full min-h-[220px] relative">
                 <ResponsiveContainer width="100%" height="100%">
@@ -40,17 +40,17 @@ export const DistributionDonut = ({ data }: DistributionDonutProps) => {
                                     <Cell key={`cell-${index}`} fill={getChartColor(entry.name)} />
                                 ))
                             ) : (
-                                <Cell key="cell-none" fill={THEME.grid} />
+                                <Cell key="cell-none" fill={THEME.elevated} />
                             )}
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
                 {/* Center Label */}
-                <div className="absolute top-[62%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <p className="text-3xl font-black text-slate-900 tracking-tighter">
+                <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                    <p className="text-3xl font-black text-foreground tracking-tighter">
                         {data.reduce((acc, curr) => acc + curr.value, 0)}
                     </p>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Total Events</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted">Total Events</p>
                 </div>
             </div>
 
@@ -58,12 +58,12 @@ export const DistributionDonut = ({ data }: DistributionDonutProps) => {
                 {['info', 'warn', 'error'].map(level => {
                     const val = data.find(d => d.name === level)?.value || 0;
                     return (
-                        <div key={level} className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div key={level} className="p-3 rounded-2xl bg-surface border border-divider">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getChartColor(level) }} />
-                                <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono">{level}</span>
+                                <span className="text-[9px] font-black uppercase text-secondary tracking-wider font-mono">{level}</span>
                             </div>
-                            <p className="text-sm font-bold text-slate-900 tabular-nums">{val}</p>
+                            <p className="text-sm font-bold text-foreground tabular-nums">{val}</p>
                         </div>
                     );
                 })}

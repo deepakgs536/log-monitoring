@@ -1,17 +1,18 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Log, Alert, DashboardMetrics, LogStats, TimeRange } from '../lib/types';
+import { Log, Alert, DashboardMetrics, LogStats, TimeRange, SystemMetrics } from '../lib/types';
 
 const LOG_FILE = path.join(process.cwd(), 'storage/logs.ndjson');
+const ALERT_FILE = path.join(process.cwd(), 'storage/alerts.ndjson');
 
 function getTimeRangeMs(range: TimeRange): number {
     const ranges: Record<TimeRange, number> = {
-        '1m': 60 * 1000,           // 1 minute
-        '1h': 60 * 60 * 1000,       // 1 hour
-        '1d': 24 * 60 * 60 * 1000,  // 1 day
-        '1w': 7 * 24 * 60 * 60 * 1000,  // 1 week
-        '1M': 30 * 24 * 60 * 60 * 1000, // 1 month (30 days)
-        '1y': 365 * 24 * 60 * 60 * 1000 // 1 year
+        '1m': 60 * 1000,
+        '1h': 60 * 60 * 1000,
+        '1d': 24 * 60 * 60 * 1000,
+        '1w': 7 * 24 * 60 * 60 * 1000,
+        '1M': 30 * 24 * 60 * 60 * 1000,
+        '1y': 365 * 24 * 60 * 60 * 1000
     };
     return ranges[range];
 }
@@ -20,16 +21,16 @@ function formatTimeKey(date: Date, range: TimeRange): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
 
     switch (range) {
-        case '1m': // Show seconds
+        case '1m':
             return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-        case '1h': // Show minutes
+        case '1h':
             return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-        case '1d': // Show hours
+        case '1d':
             return `${pad(date.getHours())}:00`;
         case '1w':
-        case '1M': // Show days
+        case '1M':
             return `${date.getMonth() + 1}/${date.getDate()}`;
-        case '1y': // Show months
+        case '1y':
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             return monthNames[date.getMonth()];
         default:
@@ -39,17 +40,15 @@ function formatTimeKey(date: Date, range: TimeRange): string {
 
 function getGranularity(range: TimeRange): number {
     const granularities: Record<TimeRange, number> = {
-        '1m': 1000,                // 1 second
-        '1h': 60 * 1000,           // 1 minute
-        '1d': 60 * 60 * 1000,      // 1 hour
-        '1w': 6 * 60 * 60 * 1000,  // 6 hours
-        '1M': 24 * 60 * 60 * 1000, // 1 day
-        '1y': 30 * 24 * 60 * 60 * 1000 // 1 month
+        '1m': 1000,
+        '1h': 60 * 1000,
+        '1d': 60 * 60 * 1000,
+        '1w': 6 * 60 * 60 * 1000,
+        '1M': 24 * 60 * 60 * 1000,
+        '1y': 30 * 24 * 60 * 60 * 1000
     };
     return granularities[range];
 }
-
-const ALERT_FILE = path.join(process.cwd(), 'storage/alerts.ndjson');
 
 async function saveAlert(alert: Alert) {
     try {
@@ -72,6 +71,29 @@ async function getRecentAlerts(limit: number = 10): Promise<Alert[]> {
     }
 }
 
+// Mock System Metrics Generator
+function generateSystemMetrics(logsPerSec: number): SystemMetrics {
+    const baseBuffer = Math.min(100, Math.max(0, (logsPerSec / 200) * 100));
+    const noise = (Math.random() - 0.5) * 10;
+    const bufferSize = Math.min(100, Math.max(5, baseBuffer + noise));
+
+    const baseLatency = 20 + (bufferSize * 5);
+    const detectionLatency = Number((baseLatency + Math.random() * 50).toFixed(0));
+
+    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
+    if (bufferSize > 90 || detectionLatency > 1000) status = 'critical';
+    else if (bufferSize > 60 || detectionLatency > 300) status = 'degraded';
+
+    return {
+        ingestionRate: Number((logsPerSec * 1.05).toFixed(1)),
+        bufferSize: Number(bufferSize.toFixed(1)),
+        detectionLatency,
+        activeStreams: 42,
+        droppedEvents: status === 'critical' ? Math.floor(Math.random() * 50) : 0,
+        status
+    };
+}
+
 async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> {
     const alerts: Alert[] = [];
     const now = Date.now();
@@ -89,13 +111,12 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
     const currentRate = shortLogs.length / (shortWindow / 1000);
     const averageRate = longLogs.length / (longWindow / 1000);
 
-    // 1. Spike Detection with Explanation
     if (currentRate > averageRate * 2 && averageRate > 1) {
         const contributorMap = new Map<string, number>();
         for (const log of shortLogs) contributorMap.set(log.service, (contributorMap.get(log.service) || 0) + 1);
         const topService = Array.from(contributorMap.entries()).sort((a, b) => b[1] - a[1])[0];
 
-        const confidence = Math.min(98, Math.floor((currentRate / (averageRate * 2)) * 70 + 20));
+        const confidence = Math.min(99, Math.floor((currentRate / (averageRate * 2)) * 70 + 20));
 
         const alert: Alert = {
             id: `spike-${now}`,
@@ -104,11 +125,11 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
             service: topService[0],
             message: `Traffic spike: ${currentRate.toFixed(1)} logs/sec in '${topService[0]}'.`,
             timestamp: now,
+            confidence,
             metadata: {
                 currentRate: Number(currentRate.toFixed(1)),
                 averageRate: Number(averageRate.toFixed(1)),
                 threshold: '2.0x',
-                confidence,
                 rationale: `Current throughput (${currentRate.toFixed(1)} LPS) is significantly higher than the 30s baseline (${averageRate.toFixed(1)} LPS).`,
                 contributor: topService[0]
             }
@@ -117,7 +138,6 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
         await saveAlert(alert);
     }
 
-    // 2. Error Burst Detection with Explanation
     const errorLogs = shortLogs.filter(l => l.level === 'error');
     const errorRate = shortLogs.length > 0 ? errorLogs.length / shortLogs.length : 0;
 
@@ -135,10 +155,10 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
             service: topErrorService[0],
             message: `High error rate (${(errorRate * 100).toFixed(1)}%) in '${topErrorService[0]}'.`,
             timestamp: now,
+            confidence,
             metadata: {
                 errorRate: Number((errorRate * 100).toFixed(1)),
                 threshold: '30.0%',
-                confidence,
                 rationale: `Error density has exceeded the 30% safety threshold, primarily driven by ${topErrorService[0]}.`,
                 source: topErrorService[0]
             }
@@ -147,7 +167,6 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
         await saveAlert(alert);
     }
 
-    // 3. Repetition Detection with Explanation
     const messageCounts = new Map<string, number>();
     for (const log of shortLogs) messageCounts.set(log.message, (messageCounts.get(log.message) || 0) + 1);
 
@@ -161,10 +180,10 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
                 service: sourceService,
                 message: `Repeat pattern in '${sourceService}'.`,
                 timestamp: now,
+                confidence: 96,
                 metadata: {
                     count,
                     threshold: '20 events/5s',
-                    confidence: 95,
                     rationale: `Message "${msg.substring(0, 30)}..." repeated ${count} times in 5 seconds, indicating a potential loop or attack.`,
                     message: msg
                 }
@@ -200,7 +219,6 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
             } catch (e) { }
         }
 
-        // Window for metrics calculation (Last 30s)
         const windowMs = 30000;
         const metricLogs = allLogs.filter(l => l.timestamp >= now - windowMs);
 
@@ -212,11 +230,13 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
         const currentAlerts = await detectAnomalies(allLogs, windowMs);
         const historicalAlerts = await getRecentAlerts(15);
 
-        // Merge and deduplicate (by ID)
-        const alerts = [...currentAlerts, ...historicalAlerts.filter(h => !currentAlerts.some(c => c.id === h.id))].slice(0, 15);
+        const processedHistoricalAlerts = historicalAlerts.map(a => ({
+            ...a,
+            confidence: a.confidence || 85
+        }));
 
-        // System Health Scoring
-        // Base 100, minus penalties for errors and anomalies
+        const alerts = [...currentAlerts, ...processedHistoricalAlerts.filter(h => !currentAlerts.some(c => c.id === h.id))].slice(0, 15);
+
         const errorPenalty = Math.min(40, errRate * 100);
         const alertPenalty = Math.min(40, alerts.filter(a => a.severity === 'critical' && a.timestamp > now - 60000).length * 15);
         const healthScore = Math.max(0, Math.floor(100 - errorPenalty - alertPenalty));
@@ -227,6 +247,8 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
             avgLatency: Number(avgLat.toFixed(0)),
             healthScore
         };
+
+        const system = generateSystemMetrics(lps);
 
         const distributionMap = new Map<string, number>();
         const timelineMap = new Map<string, { info: number; warn: number; error: number; timestamp: number }>();
@@ -264,6 +286,7 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
             total: allLogs.length,
             recentLogs: allLogs.slice(-15).reverse(),
             metrics,
+            system,
             alerts
         };
     } catch (error) {
@@ -274,6 +297,7 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
             total: 0,
             recentLogs: [],
             metrics: { logsPerSecond: 0, errorRate: 0, avgLatency: 0, healthScore: 100 },
+            system: generateSystemMetrics(0),
             alerts: []
         };
     }

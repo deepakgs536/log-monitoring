@@ -9,13 +9,20 @@ export interface Log {
     requestId: string;
 }
 
-export interface IngestionResponse {
-    accepted: number;
-    rejected: number;
+rejected: number;
 }
 
 export type AlertType = 'spike' | 'error_burst' | 'repetition' | 'latency';
 export type Severity = 'info' | 'warn' | 'critical';
+
+export interface SystemMetrics {
+    ingestionRate: number;    // logs/sec (internal ingestion)
+    bufferSize: number;       // 0-100%
+    detectionLatency: number; // ms
+    activeStreams: number;
+    droppedEvents: number;
+    status: 'healthy' | 'degraded' | 'critical';
+}
 
 export interface Alert {
     id: string;
@@ -24,11 +31,11 @@ export interface Alert {
     service: string;
     message: string;
     timestamp: number;
+    confidence: number; // 0-100% reliability score
     metadata?: {
         currentRate?: number;
         averageRate?: number;
         threshold?: string;
-        confidence?: number;
         rationale?: string;
         contributor?: string;
         source?: string;
@@ -53,5 +60,6 @@ export interface LogStats {
     total: number;
     recentLogs: Log[];
     metrics: DashboardMetrics;
+    system: SystemMetrics;
     alerts: Alert[];
 }
