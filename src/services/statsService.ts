@@ -1,10 +1,12 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Log, Alert, DashboardMetrics, LogStats, TimeRange, SystemMetrics } from '../lib/types';
+import { Log, Alert, DashboardMetrics, LogStats, TimeRange, SystemMetrics, SimulationScenario } from '../lib/types';
+import { TIME_RANGES, SIMULATION_SCENARIOS } from '../lib/constants';
 
 const LOG_FILE = path.join(process.cwd(), 'storage/logs.ndjson');
 const ALERT_FILE = path.join(process.cwd(), 'storage/alerts.ndjson');
 
+// Helper to get time range value
 function getTimeRangeMs(range: TimeRange): number {
     const ranges: Record<TimeRange, number> = {
         '1m': 60 * 1000,
@@ -14,8 +16,10 @@ function getTimeRangeMs(range: TimeRange): number {
         '1M': 30 * 24 * 60 * 60 * 1000,
         '1y': 365 * 24 * 60 * 60 * 1000
     };
-    return ranges[range];
+    return ranges[range] || 60 * 60 * 1000;
 }
+
+// ... existing formatTimeKey and getGranularity functions ...
 
 function formatTimeKey(date: Date, range: TimeRange): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -47,7 +51,7 @@ function getGranularity(range: TimeRange): number {
         '1M': 24 * 60 * 60 * 1000,
         '1y': 30 * 24 * 60 * 60 * 1000
     };
-    return granularities[range];
+    return granularities[range] || 60 * 1000;
 }
 
 async function saveAlert(alert: Alert) {
@@ -71,18 +75,52 @@ async function getRecentAlerts(limit: number = 10): Promise<Alert[]> {
     }
 }
 
+let currentScenario: SimulationScenario = 'normal';
+let scenarioStartTime = Date.now();
+
+export function setSimulationScenario(scenario: SimulationScenario) {
+    currentScenario = scenario;
+    scenarioStartTime = Date.now();
+}
+
+export function getSimulationScenario() {
+    return currentScenario;
+}
+
 // Mock System Metrics Generator
 function generateSystemMetrics(logsPerSec: number): SystemMetrics {
-    const baseBuffer = Math.min(100, Math.max(0, (logsPerSec / 200) * 100));
+    let baseBuffer = Math.min(100, Math.max(0, (logsPerSec / 200) * 100));
+    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
+    let baseLatency = 20 + (Math.random() * 10);
+
+    // Override based on scenario
+    if (currentScenario === 'spike') {
+        baseBuffer = 85 + Math.random() * 10; // High buffer
+        status = 'degraded';
+        baseLatency = 150 + Math.random() * 50;
+    } else if (currentScenario === 'failure') {
+        baseBuffer = 40;
+        status = 'critical';
+        baseLatency = 800 + Math.random() * 400; // Very high latency
+    } else if (currentScenario === 'attack') {
+        baseBuffer = 98;
+        status = 'critical';
+        baseLatency = 400 + Math.random() * 100;
+    } else if (currentScenario === 'recovery') {
+        baseBuffer = Math.max(0, 50 - (Date.now() - scenarioStartTime) / 100); // Decreasing buffer
+        status = 'healthy';
+        baseLatency = 40;
+    }
+
     const noise = (Math.random() - 0.5) * 10;
     const bufferSize = Math.min(100, Math.max(5, baseBuffer + noise));
+    const detectionLatency = Number((baseLatency + Math.random() * 20).toFixed(0));
 
-    const baseLatency = 20 + (bufferSize * 5);
-    const detectionLatency = Number((baseLatency + Math.random() * 50).toFixed(0));
-
-    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
-    if (bufferSize > 90 || detectionLatency > 1000) status = 'critical';
-    else if (bufferSize > 60 || detectionLatency > 300) status = 'degraded';
+    // Refine status based on metrics if not forced
+    if (currentScenario === 'normal') {
+        if (bufferSize > 90 || detectionLatency > 1000) status = 'critical';
+        else if (bufferSize > 60 || detectionLatency > 300) status = 'degraded';
+    }
 
     return {
         ingestionRate: Number((logsPerSec * 1.05).toFixed(1)),
@@ -93,6 +131,7 @@ function generateSystemMetrics(logsPerSec: number): SystemMetrics {
         status
     };
 }
+
 
 async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> {
     const alerts: Alert[] = [];

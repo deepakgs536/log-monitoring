@@ -1,6 +1,6 @@
 'use client';
 
-import { TIME_RANGES } from './constants';
+import { TIME_RANGES } from '@/lib/constants';
 
 interface DashboardHeaderProps {
     isLive: boolean;

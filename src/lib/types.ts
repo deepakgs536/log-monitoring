@@ -9,7 +9,7 @@ export interface Log {
     requestId: string;
 }
 
-rejected: number;
+requestId: string;
 }
 
 export type AlertType = 'spike' | 'error_burst' | 'repetition' | 'latency';
@@ -63,3 +63,5 @@ export interface LogStats {
     system: SystemMetrics;
     alerts: Alert[];
 }
+
+export type SimulationScenario = 'normal' | 'spike' | 'failure' | 'attack' | 'recovery';

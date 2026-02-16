@@ -1,7 +1,7 @@
 'use client';
 
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea } from 'recharts';
-import { THEME } from './constants';
+import { THEME } from '@/lib/constants';
 import { Alert } from '@/lib/types';
 
 interface TelemetryChartProps {

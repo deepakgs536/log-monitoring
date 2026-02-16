@@ -1,28 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050509;
-  --foreground: #FFFFFF;
-  --card: #0F111A;
-  --border: #1E232F;
-  --secondary: #64748B;
-  --muted: #94A3B8;
-  --primary: #6366F1;
-  --accent-pink: #EC4899;
-  --accent-green: #22C55E;
-  --accent-yellow: #EAB308;
-  --accent-orange: #F97316;
-  --subtle-card: #151A23;
+  /* Core Neutral System */
+  --bg-page: #F6F8FB;
+  --bg-surface: #FFFFFF;
+  --bg-muted: #EBEDF1;
+  --border-light: #E5E7EB;
+  /* Neutral Gray 200 */
+  --border-strong: #9CA3AF;
+  /* Neutral Gray 400 */
 
-  --warn: #F59E0B;
-  --error: #EF4444;
-  --success: #22C55E;
+  --text-primary: #353536;
+  --text-secondary: #706F70;
+  --text-muted: #9A9CA3;
+
+  /* Semantic Blue (Info/Primary) */
+  --blue-strong: #174082;
+  --blue-main: #2252A0;
+  --blue-soft: #3566B6;
+  --blue-bg: #E0ECFF;
+
+  /* Semantic Green (Success) */
+  --green-strong: #00665B;
+  --green-main: #1B7E74;
+  --green-soft: #2C968C;
+  --green-bg: #D4F7F2;
+
+  /* Semantic Red (Error) */
+  --red-strong: #B21919;
+  --red-main: #D43B3B;
+  --red-soft: #EA9E9E;
+  --red-bg: #FBE0E0;
+
+  /* Semantic Orange (Warning) */
+  --orange-strong: #8F7200;
+  --orange-main: #C99500;
+  --orange-soft: #F8E081;
+  --orange-bg: #FFF3C2;
+
+  /* Application Mappings */
+  --background: var(--bg-page);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --surface: var(--bg-surface);
+  --elevated: var(--bg-muted);
+
+  --border: var(--border-light);
+  --secondary: var(--text-secondary);
+  --muted: var(--text-muted);
+
+  --primary: var(--blue-main);
+  --subtle-card: var(--blue-bg);
+
+  --accent-pink: var(--red-main);
+  --accent-green: var(--green-main);
+  --accent-yellow: var(--orange-main);
+  --accent-orange: var(--orange-strong);
+
+  --warn: var(--orange-main);
+  --error: var(--red-main);
+  --success: var(--green-main);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
   --color-border: var(--border);
   --color-secondary: var(--secondary);
   --color-muted: var(--muted);
@@ -36,10 +81,7 @@
   --color-error: var(--error);
   --color-success: var(--success);
 
-  --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+  /* Custom shadows removed as per user request */
 }
 
 body {
@@ -74,9 +116,6 @@ body {
   animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.shadow-soft {
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
-}
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
