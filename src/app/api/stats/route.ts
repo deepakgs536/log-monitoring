@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getLogStats, TimeRange } from '../../../services/statsService';
+import { getLogStats } from '@/services/statsService';
+import { TimeRange } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 

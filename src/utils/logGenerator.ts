@@ -18,7 +18,15 @@ function generateId(): string {
 
 export function generateLog(): Log {
     const service = SERVICES[Math.floor(Math.random() * SERVICES.length)];
-    const level = LEVELS[Math.floor(Math.random() * LEVELS.length)];
+    const rand = Math.random() * 100;
+    let level: LogLevel;
+    if (rand < 5) {
+        level = 'error';
+    } else if (rand < 15) {
+        level = 'warn';
+    } else {
+        level = 'info';
+    }
     const message = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
     const latency = Math.floor(Math.random() * 500); // 0-500ms
 
