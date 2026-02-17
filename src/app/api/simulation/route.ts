@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
-import { setSimulationScenario, SimulationScenario } from '@/services/statsService';
+import { setSimulationScenario } from '@/services/statsService';
+import { SimulationScenario } from '@/lib/types';
 
 export async function POST(request: Request) {
     try {

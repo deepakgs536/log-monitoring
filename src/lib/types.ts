@@ -1,5 +1,12 @@
 export type LogLevel = 'info' | 'warn' | 'error';
 
+export interface Application {
+    id: string;
+    name: string;
+    apiKey?: string;
+    createdAt: number;
+}
+
 export interface Log {
     timestamp: number;
     service: string;
@@ -7,9 +14,7 @@ export interface Log {
     message: string;
     latency: number; // in ms
     requestId: string;
-}
-
-requestId: string;
+    metadata?: any;
 }
 
 export type AlertType = 'spike' | 'error_burst' | 'repetition' | 'latency';
@@ -45,6 +50,20 @@ export interface Alert {
     };
 }
 
+export interface IngestionResponse {
+    accepted: number;
+    rejected: number;
+}
+
+export interface LogQueryParams {
+    search?: string;
+    level?: LogLevel | 'all';
+    service?: string | 'all';
+    startTime?: number;
+    endTime?: number;
+    limit?: number;
+}
+
 export interface DashboardMetrics {
     logsPerSecond: number;
     errorRate: number;
@@ -52,7 +71,7 @@ export interface DashboardMetrics {
     healthScore: number;
 }
 
-export type TimeRange = '1m' | '1h' | '1d' | '1w' | '1M' | '1y';
+export type TimeRange = '1m' | '15m' | '1h' | '6h' | '12h' | '24h' | '1d' | '1w' | '7d' | '1M' | '1y';
 
 export interface LogStats {
     distribution: { name: string; value: number }[];

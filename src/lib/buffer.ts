@@ -4,36 +4,47 @@ import { appendBatch } from './writer';
 const FLUSH_THRESHOLD = 100;
 const FLUSH_INTERVAL_MS = 2000;
 
-let buffer: Log[] = [];
+// Map of appId -> buffer
+const buffers: Map<string, Log[]> = new Map();
 let flushTimer: NodeJS.Timeout | null = null;
 
-export function push(log: Log): void {
+export function push(appId: string, log: Log): void {
+    if (!buffers.has(appId)) {
+        buffers.set(appId, []);
+    }
+
+    const buffer = buffers.get(appId)!;
     buffer.push(log);
 
     if (buffer.length >= FLUSH_THRESHOLD) {
-        flush();
+        flushApp(appId);
     }
 }
 
-async function flush() {
-    if (buffer.length === 0) return;
+async function flushApp(appId: string) {
+    const buffer = buffers.get(appId);
+    if (!buffer || buffer.length === 0) return;
 
     const batch = [...buffer];
-    buffer = []; // clear buffer immediately to allow new writes
+    buffers.set(appId, []); // Limit memory usage by clearing reference, though new array created above
 
-    // Async write - strictly fire and forget from the API's perspective
-    // We don't await this in the main flow, but we catch errors inside writer.
-    await appendBatch(batch);
+    // Async write
+    await appendBatch(appId, batch);
+}
+
+async function flushAll() {
+    for (const appId of buffers.keys()) {
+        await flushApp(appId);
+    }
 }
 
 // Auto-flush timer
 if (!flushTimer) {
     flushTimer = setInterval(() => {
-        flush();
+        flushAll();
     }, FLUSH_INTERVAL_MS);
 }
 
-// Optional: cleanup method if needed (e.g. for testing)
 export function cleanup() {
     if (flushTimer) {
         clearInterval(flushTimer);

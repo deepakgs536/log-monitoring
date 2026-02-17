@@ -1,40 +1,59 @@
-'use client';
-
-import { TIME_RANGES } from '@/lib/constants';
+import { TimeRange } from '@/lib/types';
+import { ExportMenu } from '@/components/dashboard/ExportMenu';
 
 interface DashboardHeaderProps {
     isLive: boolean;
-    timeRange: string;
-    setTimeRange: (range: any) => void;
+    timeRange: TimeRange;
+    setTimeRange?: (range: TimeRange) => void;
 }
+
+const TIME_OPTIONS: { value: TimeRange; label: string }[] = [
+    { value: '15m', label: '15m' },
+    { value: '1h', label: '1h' },
+    { value: '6h', label: '6h' },
+    { value: '24h', label: '24h' },
+    { value: '7d', label: '7d' },
+];
 
 export const DashboardHeader = ({ isLive, timeRange, setTimeRange }: DashboardHeaderProps) => {
     return (
-        <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1 bg-surface p-1.5 rounded-xl border border-border shadow-soft">
-                {TIME_RANGES.filter(r => ['1h', '24h', '7d'].includes(r.value)).map((range) => (
+        <div className="flex items-center gap-3">
+            {/* Live Indicator — enhanced with glow ring */}
+            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-all duration-300 ${isLive
+                ? 'bg-red-50/80 backdrop-blur-sm border-red-200 shadow-sm shadow-red-100/50 animate-pulse-glow-red'
+                : 'bg-gray-50/80 backdrop-blur-sm border-gray-200'
+                }`}>
+                <div className="relative">
+                    <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-red-500' : 'bg-gray-400'}`} />
+                    {isLive && <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-40" />}
+                </div>
+                <span className={`text-[11px] font-bold ${isLive ? 'text-red-600' : 'text-gray-500'}`}>
+                    {isLive ? 'Live' : 'Paused'}
+                </span>
+            </div>
+
+            <div className="h-6 w-px bg-gray-200/60" />
+
+            {/* Time Range Pills — premium */}
+            <div className="flex items-center bg-white/60 backdrop-blur-sm p-1 rounded-xl border border-gray-200/50 shadow-sm">
+                {TIME_OPTIONS.map((opt) => (
                     <button
-                        key={range.value}
-                        onClick={() => setTimeRange(range.value)}
-                        className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${timeRange === range.value
-                            ? 'bg-elevated text-foreground shadow-soft border border-divider'
-                            : 'text-muted hover:text-foreground hover:bg-elevated/50'
+                        key={opt.value}
+                        onClick={() => setTimeRange && setTimeRange(opt.value)}
+                        disabled={!setTimeRange}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-300 ${timeRange === opt.value
+                            ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-md shadow-red-200/50 scale-[1.02]'
+                            : 'text-gray-500 hover:text-gray-800 hover:bg-white/80 hover:shadow-sm active:scale-95'
                             }`}
                     >
-                        {range.label}
+                        {opt.label}
                     </button>
                 ))}
             </div>
 
-            <div className="h-6 w-[1px] bg-divider mx-1" />
+            <div className="h-6 w-px bg-gray-200/60" />
 
-            <div className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border text-[10px] font-black tracking-widest uppercase transition-all duration-500 shadow-soft ${isLive
-                ? 'bg-success/10 text-success border-success/20'
-                : 'bg-error/10 text-error border-error/20'
-                }`}>
-                <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-success animate-pulse' : 'bg-error'}`} />
-                {isLive ? 'Live System Feed' : 'Stream Paused'}
-            </div>
+            <ExportMenu showIncidents={true} showSummary={true} />
         </div>
     );
 };

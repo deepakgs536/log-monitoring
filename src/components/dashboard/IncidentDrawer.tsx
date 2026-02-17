@@ -1,7 +1,6 @@
 import { Alert } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Activity, AlertTriangle, TrendingDown, ArrowRight, ShieldCheck, Microscope } from 'lucide-react';
-import { THEME } from './constants';
+import { X, AlertTriangle, TrendingDown, ArrowRight, ShieldCheck, Microscope, Activity, Zap, Clock, ExternalLink } from 'lucide-react';
 
 interface IncidentDrawerProps {
     alert: Alert | null;
@@ -12,8 +11,6 @@ export const IncidentDrawer = ({ alert, onClose }: IncidentDrawerProps) => {
     if (!alert) return null;
 
     const isCritical = alert.severity === 'critical';
-
-    // Formatting helper
     const fmt = (num: number | undefined, suffix = '') => num !== undefined ? `${num}${suffix}` : '--';
 
     return (
@@ -26,7 +23,7 @@ export const IncidentDrawer = ({ alert, onClose }: IncidentDrawerProps) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-background/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-50"
                     />
 
                     {/* Drawer */}
@@ -34,120 +31,165 @@ export const IncidentDrawer = ({ alert, onClose }: IncidentDrawerProps) => {
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border shadow-2xl z-50 overflow-y-auto"
+                        transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                        className="fixed top-0 right-0 h-full w-full max-w-[440px] bg-white border-l border-gray-100 shadow-2xl z-50 overflow-y-auto"
                     >
+                        {/* Red Top Accent */}
+                        <div className={`h-1 ${isCritical ? 'bg-gradient-to-r from-red-600 via-red-500 to-rose-400' : 'bg-gradient-to-r from-amber-500 to-orange-400'}`} />
+
                         {/* Header */}
-                        <div className={`p-6 border-b flex items-start justify-between bg-surface/50 ${isCritical ? 'border-error/20' : 'border-warning/20'
-                            }`}>
-                            <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-2xl ${isCritical ? 'bg-error text-white shadow-glow-error' : 'bg-warning text-warning-foreground shadow-glow-warning'
-                                    }`}>
-                                    {isCritical ? <AlertTriangle className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
-                                </div>
-                                <div>
-                                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest leading-none mb-1">
-                                        Detection Analysis
-                                    </h2>
-                                    <p className={`text-xs font-bold uppercase tracking-wider ${isCritical ? 'text-error' : 'text-warning'
+                        <div className="px-6 py-5 border-b border-gray-100">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2.5 rounded-2xl ${isCritical
+                                        ? 'bg-red-50 text-red-500'
+                                        : 'bg-amber-50 text-amber-500'
                                         }`}>
-                                        {alert.type.replace('_', ' ')}
-                                    </p>
+                                        {isCritical ? <AlertTriangle className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-[15px] font-bold text-gray-900 tracking-tight">
+                                            Detection Analysis
+                                        </h2>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md ${isCritical
+                                                ? 'bg-red-50 text-red-500'
+                                                : 'bg-amber-50 text-amber-500'
+                                                }`}>
+                                                {alert.type.replace('_', ' ')}
+                                            </span>
+                                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(alert.timestamp).toLocaleTimeString()}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={onClose}
+                                    className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="p-2 hover:bg-elevated rounded-full text-muted hover:text-foreground transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-8">
+                        <div className="p-6 space-y-6">
 
-                            {/* Verdict Section */}
-                            <section className="space-y-4">
+                            {/* AI Verdict */}
+                            <section className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <Microscope className="w-4 h-4 text-accent-cyan" />
-                                    <h3 className="text-xs font-bold text-muted uppercase tracking-widest">AI Verdict</h3>
+                                    <Microscope className="w-4 h-4 text-red-400" />
+                                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">AI Verdict</h3>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-surface border border-border space-y-3">
-                                    <p className="text-sm text-foreground font-medium leading-relaxed">
+                                <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                                    <p className="text-[13px] text-gray-700 font-medium leading-relaxed">
                                         {alert.metadata?.rationale || alert.message}
                                     </p>
-                                    <div className="flex items-center gap-2 text-xs">
-                                        <span className="px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple font-bold border border-accent-purple/20">
-                                            Confidence: {alert.confidence}%
-                                        </span>
-                                        <span className="text-muted">– Calculation based on statistical deviation.</span>
+                                    <div className="flex items-center gap-2 mt-3">
+                                        <div className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${(alert.confidence || 0) > 90
+                                                ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                                                : (alert.confidence || 0) > 70
+                                                    ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                                    : 'bg-gray-50 border-gray-200 text-gray-600'
+                                            }`}>
+                                            {alert.confidence}% confidence
+                                        </div>
+                                        <span className="text-[10px] text-gray-400">Statistical deviation analysis</span>
                                     </div>
                                 </div>
                             </section>
 
-                            {/* Metrics Grid */}
-                            <section className="space-y-4">
+                            {/* Evidence Data */}
+                            <section className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-accent-cyan" />
-                                    <h3 className="text-xs font-bold text-muted uppercase tracking-widest">Evidence Data</h3>
+                                    <Activity className="w-4 h-4 text-red-400" />
+                                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Evidence Data</h3>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="p-3 bg-surface rounded-xl border border-border">
-                                        <p className="text-[10px] text-muted uppercase font-bold mb-1">Observed Value</p>
-                                        <p className="text-xl font-black text-foreground">
-                                            {alert.type === 'spike' ? fmt(alert.metadata?.currentRate, ' LPS') :
-                                                alert.type === 'error_burst' ? fmt(alert.metadata?.errorRate, '%') :
+                                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                                        <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wide mb-1.5">Observed</p>
+                                        <p className="text-2xl font-bold text-gray-900 tracking-tight">
+                                            {alert.type === 'spike' ? fmt(alert.metadata?.currentRate) :
+                                                alert.type === 'error_burst' ? fmt(alert.metadata?.errorRate) :
                                                     fmt(alert.metadata?.count)}
                                         </p>
-                                    </div>
-                                    <div className="p-3 bg-surface rounded-xl border border-border">
-                                        <p className="text-[10px] text-muted uppercase font-bold mb-1">Baseline (30s)</p>
-                                        <p className="text-xl font-black text-secondary">
-                                            {alert.type === 'spike' ? fmt(alert.metadata?.averageRate, ' LPS') :
-                                                alert.type === 'error_burst' ? '0.0%' :
-                                                    '--'}
+                                        <p className="text-[10px] text-gray-400 mt-0.5">
+                                            {alert.type === 'spike' ? 'LPS' : alert.type === 'error_burst' ? '% error rate' : 'events'}
                                         </p>
                                     </div>
-                                    <div className="col-span-2 p-3 bg-surface rounded-xl border border-border flex items-center justify-between">
-                                        <div>
-                                            <p className="text-[10px] text-muted uppercase font-bold mb-1">Trigger Rule</p>
-                                            <p className="text-sm font-bold text-foreground font-mono">
-                                                {alert.type === 'spike' ? `> ${alert.metadata?.threshold} baseline deviation` :
-                                                    alert.type === 'error_burst' ? `> ${alert.metadata?.threshold} error density` :
-                                                        `> ${alert.metadata?.threshold} repetitions`}
-                                            </p>
-                                        </div>
-                                        <div className={`px-3 py-1 rounded-lg text-xs font-bold border ${isCritical ? 'bg-error/10 text-error border-error/20' : 'bg-warning/10 text-warning border-warning/20'
-                                            }`}>
-                                            Triggered
-                                        </div>
+                                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                                        <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wide mb-1.5">Baseline</p>
+                                        <p className="text-2xl font-bold text-gray-400 tracking-tight">
+                                            {alert.type === 'spike' ? fmt(alert.metadata?.averageRate) :
+                                                alert.type === 'error_burst' ? '0.0' :
+                                                    '--'}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">30s average</p>
+                                    </div>
+                                </div>
+
+                                {/* Trigger Rule - Full Width */}
+                                <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wide mb-1">Trigger Rule</p>
+                                        <p className="text-sm font-semibold text-gray-900 font-mono">
+                                            {alert.type === 'spike' ? `> ${alert.metadata?.threshold} baseline deviation` :
+                                                alert.type === 'error_burst' ? `> ${alert.metadata?.threshold} error density` :
+                                                    `> ${alert.metadata?.threshold} repetitions`}
+                                        </p>
+                                    </div>
+                                    <div className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border ${isCritical
+                                        ? 'bg-red-50 text-red-500 border-red-200'
+                                        : 'bg-amber-50 text-amber-500 border-amber-200'
+                                        }`}>
+                                        Triggered
                                     </div>
                                 </div>
                             </section>
 
-                            {/* Impact */}
-                            <section className="space-y-4">
+                            {/* System Impact */}
+                            <section className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <ShieldCheck className="w-4 h-4 text-accent-cyan" />
-                                    <h3 className="text-xs font-bold text-muted uppercase tracking-widest">System Impact</h3>
+                                    <ShieldCheck className="w-4 h-4 text-red-400" />
+                                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">System Impact</h3>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-elevated border border-border">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-accent-pink mt-1.5" />
-                                        <div>
-                                            <p className="text-xs font-bold text-foreground">Service Affected: <span className="text-accent-pink">{alert.service}</span></p>
-                                            <p className="text-[10px] text-muted mt-1">
-                                                Correlation ID: {alert.id.split('-')[1]}
-                                            </p>
+                                <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500' : 'bg-amber-400'}`} />
+                                            <span className="text-xs font-medium text-gray-600">Affected Service</span>
                                         </div>
+                                        <span className="text-xs font-bold text-red-500">{alert.service}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-medium text-gray-600">Severity</span>
+                                        <span className={`text-xs font-bold uppercase ${isCritical ? 'text-red-500' : 'text-amber-500'}`}>
+                                            {alert.severity}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-medium text-gray-600">Correlation ID</span>
+                                        <span className="text-[10px] font-mono text-gray-400">
+                                            {alert.id}
+                                        </span>
                                     </div>
                                 </div>
                             </section>
 
                             {/* Actions */}
-                            <div className="pt-6 border-t border-border mt-auto">
-                                <button className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2">
-                                    Initiate Investigation <ArrowRight className="w-4 h-4" />
+                            <div className="pt-4 space-y-3 mt-auto">
+                                <button className="w-full py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider shadow-lg shadow-red-200/50 transition-all flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-red-200/60">
+                                    <Zap className="w-4 h-4" />
+                                    Initiate Investigation
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold transition-all border border-gray-100"
+                                >
+                                    Dismiss
                                 </button>
                             </div>
 

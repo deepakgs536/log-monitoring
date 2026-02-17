@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { SIMULATION_SCENARIOS } from '@/lib/constants';
 import { SimulationScenario } from '@/lib/types';
-import { Play, TrendingUp, AlertTriangle, ShieldAlert, Activity } from 'lucide-react';
+import { Activity, RotateCcw } from 'lucide-react';
 
 export const SimulationControls = () => {
     const [activeScenario, setActiveScenario] = useState<SimulationScenario>('normal');
@@ -13,7 +13,6 @@ export const SimulationControls = () => {
     const handleScenarioChange = async (scenario: SimulationScenario) => {
         setLoading(true);
         setStatus(`Running ${scenario}...`);
-        // Optimistic update
         setActiveScenario(scenario);
 
         try {
@@ -37,9 +36,11 @@ export const SimulationControls = () => {
     return (
         <div className="w-full space-y-4">
             <div className="flex items-center justify-between">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted">Scenario Injection</h4>
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-gray-500">Scenario Injection</h4>
                 {status && (
-                    <span className="text-[10px] font-mono text-accent-cyan animate-pulse">{status}</span>
+                    <span className="text-[10px] font-mono font-semibold text-red-500 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100 animate-border-pulse">
+                        {status}
+                    </span>
                 )}
             </div>
 
@@ -52,20 +53,30 @@ export const SimulationControls = () => {
                             key={scenario.id}
                             onClick={() => handleScenarioChange(scenario.id)}
                             disabled={loading}
-                            className={`flex flex-col gap-2 p-3 rounded-xl border text-left transition-all duration-200 ${isActive
-                                    ? `bg-${scenario.color}/10 border-${scenario.color} shadow-soft`
-                                    : 'bg-card border-border hover:bg-surface hover:border-slate-700'
+                            className={`flex flex-col gap-2.5 p-4 rounded-xl border text-left transition-all duration-300 group relative overflow-hidden ${isActive
+                                ? 'bg-white/95 backdrop-blur-md border-red-200 shadow-lg shadow-red-100/30 ring-1 ring-red-100 animate-border-pulse'
+                                : 'bg-white/60 backdrop-blur-sm border-gray-100 hover:bg-white hover:border-red-100/50 hover:shadow-md hover:shadow-red-50/50 hover:-translate-y-0.5'
                                 }`}
                         >
-                            <div className="flex items-center justify-between w-full">
-                                <Icon className={`w-4 h-4 ${isActive ? `text-${scenario.color}` : 'text-muted'}`} />
-                                {isActive && <div className={`w-1.5 h-1.5 rounded-full bg-${scenario.color} animate-pulse`} />}
+                            {/* Hover glow */}
+                            <div className={`absolute inset-0 rounded-xl transition-opacity duration-500 ${isActive ? 'bg-gradient-to-br from-red-50/40 to-rose-50/30 opacity-100' : 'bg-gradient-to-br from-red-50/0 to-rose-50/0 opacity-0 group-hover:opacity-100'}`} />
+
+                            <div className="relative flex items-center justify-between w-full">
+                                <div className={`p-1.5 rounded-lg transition-all duration-300 ${isActive ? 'bg-red-50 border border-red-100 shadow-sm shadow-red-100/30' : 'bg-gray-100 border border-gray-200 group-hover:bg-red-50 group-hover:border-red-100'}`}>
+                                    <Icon className={`w-3.5 h-3.5 transition-colors duration-300 ${isActive ? 'text-red-500' : 'text-gray-400 group-hover:text-red-400'}`} />
+                                </div>
+                                {isActive && (
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                        <span className="text-[9px] font-bold text-red-500 uppercase">Active</span>
+                                    </div>
+                                )}
                             </div>
-                            <div>
-                                <div className={`text-xs font-bold ${isActive ? 'text-foreground' : 'text-secondary'}`}>
+                            <div className="relative">
+                                <div className={`text-xs font-bold ${isActive ? 'text-gray-900' : 'text-gray-600'}`}>
                                     {scenario.label}
                                 </div>
-                                <div className="text-[9px] text-muted line-clamp-1 leading-tight mt-0.5">
+                                <div className="text-[9px] text-gray-400 line-clamp-1 leading-tight mt-0.5 font-medium">
                                     {scenario.description}
                                 </div>
                             </div>
@@ -77,10 +88,11 @@ export const SimulationControls = () => {
             <button
                 onClick={() => handleScenarioChange('normal')}
                 disabled={activeScenario === 'normal'}
-                className="w-full py-2 flex items-center justify-center gap-2 rounded-lg border border-border text-[10px] font-bold uppercase tracking-widest text-muted hover:text-foreground hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50/50 hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 group relative overflow-hidden"
             >
-                <Activity className="w-3 h-3" />
-                Reset to Normal
+                <div className="absolute inset-0 bg-gradient-to-r from-red-50/0 via-red-50/0 to-red-50/0 group-hover:from-red-50/20 group-hover:via-red-50/40 group-hover:to-red-50/20 transition-all duration-500" />
+                <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-[-180deg] transition-transform duration-500 relative" />
+                <span className="relative">Reset to Normal</span>
             </button>
         </div>
     );

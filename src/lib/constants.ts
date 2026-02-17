@@ -30,6 +30,11 @@ export const THEME = {
     accentGreen: '#1B7E74', // green-main
     accentYellow: '#C99500', // orange-main
 
+    // Brand Aliases
+    primary: '#2252A0', // blue-main
+    secondary: '#C99500', // orange-main (used as secondary accent)
+    critical: '#B21919', // red-strong
+
     // Soft / Glow Bases - Container Backgrounds
     infoSoft: '#E0ECFF', // blue-bg
     successSoft: '#D4F7F2', // green-bg
@@ -51,7 +56,7 @@ export const NAV_ITEMS = [
     { label: 'Incidents', path: '/incidents', icon: AlertTriangle },
     { label: 'Logs', path: '/logs', icon: Terminal },
     { label: 'Analytics', path: '/analytics', icon: BarChart2 },
-    { label: 'Settings', path: '/settings', icon: Settings },
+    { label: 'Applications', path: '/applications', icon: LayoutDashboard },
 ];
 
 export const SIMULATION_SCENARIOS = [

@@ -1,18 +1,27 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import LandingNavbar from '@/components/landing/LandingNavbar';
+import HeroSection from '@/components/landing/HeroSection';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import IntegrationSection from '@/components/landing/IntegrationSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import StatsSection from '@/components/landing/StatsSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import PricingSection from '@/components/landing/PricingSection';
+import CTASection from '@/components/landing/CTASection';
+import Footer from '@/components/landing/Footer';
 
 export default function Home() {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.push('/console');
-    }, [router]);
-
     return (
-        <div className="flex items-center justify-center h-screen bg-[#0f172a]">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen bg-white">
+            <LandingNavbar />
+            <HeroSection />
+            <FeaturesSection />
+            <IntegrationSection />
+            <HowItWorksSection />
+            {/* <StatsSection /> */}
+            {/* <TestimonialsSection /> */}
+            {/* <PricingSection /> */}
+            <CTASection />
+            <Footer />
         </div>
     );
 }

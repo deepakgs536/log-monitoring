@@ -1,18 +1,23 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { Log, Alert, DashboardMetrics, LogStats, TimeRange, SystemMetrics, SimulationScenario } from '../lib/types';
 import { TIME_RANGES, SIMULATION_SCENARIOS } from '../lib/constants';
 
-const LOG_FILE = path.join(process.cwd(), 'storage/logs.ndjson');
-const ALERT_FILE = path.join(process.cwd(), 'storage/alerts.ndjson');
+const STORAGE_DIR = path.join(process.cwd(), 'storage');
 
 // Helper to get time range value
 function getTimeRangeMs(range: TimeRange): number {
     const ranges: Record<TimeRange, number> = {
         '1m': 60 * 1000,
+        '15m': 15 * 60 * 1000,
         '1h': 60 * 60 * 1000,
+        '6h': 6 * 60 * 60 * 1000,
+        '12h': 12 * 60 * 60 * 1000,
+        '24h': 24 * 60 * 60 * 1000,
         '1d': 24 * 60 * 60 * 1000,
         '1w': 7 * 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
         '1M': 30 * 24 * 60 * 60 * 1000,
         '1y': 365 * 24 * 60 * 60 * 1000
     };
@@ -26,9 +31,9 @@ function formatTimeKey(date: Date, range: TimeRange): string {
 
     switch (range) {
         case '1m':
-            return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+            return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} `;
         case '1h':
-            return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            return `${pad(date.getHours())}:${pad(date.getMinutes())} `;
         case '1d':
             return `${pad(date.getHours())}:00`;
         case '1w':
@@ -45,26 +50,35 @@ function formatTimeKey(date: Date, range: TimeRange): string {
 function getGranularity(range: TimeRange): number {
     const granularities: Record<TimeRange, number> = {
         '1m': 1000,
+        '15m': 10 * 1000,
         '1h': 60 * 1000,
+        '6h': 15 * 60 * 1000,
+        '12h': 30 * 60 * 1000,
+        '24h': 60 * 60 * 1000,
         '1d': 60 * 60 * 1000,
         '1w': 6 * 60 * 60 * 1000,
+        '7d': 6 * 60 * 60 * 1000,
         '1M': 24 * 60 * 60 * 1000,
         '1y': 30 * 24 * 60 * 60 * 1000
     };
     return granularities[range] || 60 * 1000;
 }
 
-async function saveAlert(alert: Alert) {
+async function saveAlert(appId: string, alert: Alert) {
     try {
-        await fs.appendFile(ALERT_FILE, JSON.stringify(alert) + '\n');
+        const appOpsDir = path.join(STORAGE_DIR, appId);
+        await fs.mkdir(appOpsDir, { recursive: true });
+        const alertFile = path.join(appOpsDir, 'alerts.ndjson');
+        await fs.appendFile(alertFile, JSON.stringify(alert) + '\n');
     } catch (e) {
-        console.error('Failed to save alert:', e);
+        console.error(`Failed to save alert for app ${appId}:`, e);
     }
 }
 
-async function getRecentAlerts(limit: number = 10): Promise<Alert[]> {
+async function getRecentAlerts(appId: string, limit: number = 10): Promise<Alert[]> {
     try {
-        const content = await fs.readFile(ALERT_FILE, 'utf-8');
+        const alertFile = path.join(STORAGE_DIR, appId, 'alerts.ndjson');
+        const content = await fs.readFile(alertFile, 'utf-8');
         return content.trim().split('\n')
             .filter(Boolean)
             .map(line => JSON.parse(line))
@@ -133,7 +147,7 @@ function generateSystemMetrics(logsPerSec: number): SystemMetrics {
 }
 
 
-async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> {
+async function detectAnomalies(appId: string, logs: Log[], windowMs: number): Promise<Alert[]> {
     const alerts: Alert[] = [];
     const now = Date.now();
 
@@ -174,7 +188,7 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
             }
         };
         alerts.push(alert);
-        await saveAlert(alert);
+        await saveAlert(appId, alert);
     }
 
     const errorLogs = shortLogs.filter(l => l.level === 'error');
@@ -203,7 +217,7 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
             }
         };
         alerts.push(alert);
-        await saveAlert(alert);
+        await saveAlert(appId, alert);
     }
 
     const messageCounts = new Map<string, number>();
@@ -228,7 +242,7 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
                 }
             };
             alerts.push(alert);
-            await saveAlert(alert);
+            await saveAlert(appId, alert);
             break;
         }
     }
@@ -236,9 +250,26 @@ async function detectAnomalies(logs: Log[], windowMs: number): Promise<Alert[]> 
     return alerts;
 }
 
-export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats> {
+export async function getLogStats(appId: string, timeRange: TimeRange = '1h'): Promise<LogStats> {
     try {
-        const fileContent = await fs.readFile(LOG_FILE, 'utf-8');
+        const logFile = path.join(STORAGE_DIR, appId, 'logs.ndjson');
+
+        // Check availability strictly for stats to avoid throwing
+        try {
+            await fs.access(logFile);
+        } catch {
+            return {
+                distribution: [],
+                timeline: [],
+                total: 0,
+                recentLogs: [],
+                metrics: { logsPerSecond: 0, errorRate: 0, avgLatency: 0, healthScore: 100 },
+                system: generateSystemMetrics(0),
+                alerts: []
+            };
+        }
+
+        const fileContent = await fs.readFile(logFile, 'utf-8');
         const lines = fileContent.trim().split('\n');
 
         const now = Date.now();
@@ -266,8 +297,8 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
         const errRate = metricLogs.length > 0 ? errCount / metricLogs.length : 0;
         const avgLat = metricLogs.length > 0 ? metricLogs.reduce((acc, l) => acc + (l.latency || 0), 0) / metricLogs.length : 0;
 
-        const currentAlerts = await detectAnomalies(allLogs, windowMs);
-        const historicalAlerts = await getRecentAlerts(15);
+        const currentAlerts = await detectAnomalies(appId, allLogs, windowMs);
+        const historicalAlerts = await getRecentAlerts(appId, 15);
 
         const processedHistoricalAlerts = historicalAlerts.map(a => ({
             ...a,
@@ -329,7 +360,7 @@ export async function getLogStats(timeRange: TimeRange = '1h'): Promise<LogStats
             alerts
         };
     } catch (error) {
-        console.error('Error reading stats:', error);
+        console.error(`Error reading stats for app ${appId}:`, error);
         return {
             distribution: [],
             timeline: [],
