@@ -141,7 +141,7 @@ export default function Dashboard() {
             ))}
 
             <main className="flex-1 flex flex-col relative z-10">
-                <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-7">
+                <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 space-y-5">
                     {/* Layer 0: System Reliability & Notifications */}
                     <motion.div
                         initial={{ opacity: 0, y: 12 }}
@@ -157,7 +157,7 @@ export default function Dashboard() {
                     <div className="section-divider" />
 
                     {/* Layer 1: Metric Cards — Staggered Entrance */}
-                    <section className="space-y-5">
+                    <section className="space-y-3">
                         {/* Section heading */}
                         <motion.div
                             initial={{ opacity: 0, x: -12 }}
@@ -171,7 +171,7 @@ export default function Dashboard() {
                             <div className="flex-1 section-divider ml-3" />
                         </motion.div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {[
                                 { label: 'Health', value: stats.metrics.healthScore, unit: '%', color: stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.warning : THEME.error, desc: 'System integrity' },
                                 { label: 'TPS', value: stats.metrics.logsPerSecond, unit: 'LPS', color: THEME.accentPurple, desc: 'Ingestion rate' },
@@ -187,7 +187,7 @@ export default function Dashboard() {
                         {/* Charts Row */}
                         <motion.div
                             initial="hidden" animate="visible" variants={sectionVariants}
-                            className="grid grid-cols-1 xl:grid-cols-12 gap-6"
+                            className="grid grid-cols-1 xl:grid-cols-12 gap-4"
                         >
                             <div className="xl:col-span-8 console-card-premium min-h-[450px]">
                                 <TelemetryChart data={stats.timeline} alerts={stats.alerts} />

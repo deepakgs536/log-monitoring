@@ -19,78 +19,81 @@ export const MetricCard = ({ label, value, unit, color, desc, trend, compact }: 
 
     const getTrendIcon = () => {
         if (!trend) return null;
+        const up = <TrendingUp className="w-3 h-3" />;
+        const down = <TrendingDown className="w-3 h-3" />;
+
         if (typeof trend === 'string') {
             const isGood = ['Normal', 'Healthy', 'Fast', 'Optimal'].includes(trend);
-            return isGood ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />;
+            return isGood ? up : down;
         }
-        return trend.isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />;
+        return trend.isPositive ? up : down;
     };
 
     const getTrendColor = () => {
         if (!trend) return '';
+        const good = 'text-red-600 bg-red-50 border-red-100';
+        const bad = 'text-gray-600 bg-gray-100 border-gray-200';
+
         if (typeof trend === 'string') {
             const isGood = ['Normal', 'Healthy', 'Fast', 'Optimal'].includes(trend);
-            return isGood ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
+            return isGood ? good : bad;
         }
-        return trend.isPositive ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50';
+        return trend.isPositive ? good : bad; // Simplification: assume positive trend is "good" or use red for "active"
     };
 
+    // Compact Premium Red Design
     if (compact) {
         return (
-            <div className={`relative p-5 rounded-2xl bg-white/90 backdrop-blur-md border border-gray-100/80 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-red-100/20 hover:-translate-y-1 flex-1 min-w-0 flex flex-col justify-center overflow-hidden group console-metric-glow ${isHealth && numValue < 50 ? 'border-red-200 bg-red-50/30' : ''}`}>
-                {/* Left accent bar */}
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(to bottom, ${color}, transparent)` }} />
-                {/* Hover glow background */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-50/0 to-rose-50/0 group-hover:from-red-50/30 group-hover:to-rose-50/20 transition-all duration-500" />
-                <div className="relative flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">{label}</span>
-                    {trend && typeof trend === 'string' && (
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${getTrendColor()}`}>
-                            {getTrendIcon()}
-                            {trend}
+            <div className={`relative p-4 sm:p-5 rounded-2xl bg-white/70 backdrop-blur-xl border border-red-100 shadow-sm transition-all duration-300 hover:shadow-md hover:shadow-red-500/10 hover:-translate-y-0.5 group overflow-hidden ${isHealth && numValue < 80 ? 'ring-1 ring-red-400 bg-red-50/30' : ''}`}>
+
+                {/* Subtle Red Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-red-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Accent Bar */}
+                <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-red-500/20 rounded-r-full group-hover:bg-red-500/50 transition-colors" />
+
+                <div className="relative flex flex-col items-start gap-3">
+                    <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isHealth ? (numValue > 90 ? 'bg-red-500' : 'bg-red-500 animate-pulse') : 'bg-red-200 group-hover:bg-red-400 transition-colors'}`} />
+                    </div>
+
+                    <div className="flex items-baseline gap-1.5">
+                        <span className={`text-2xl sm:text-3xl font-black tracking-tight ${isHealth && numValue < 80 ? 'text-red-600' : 'text-gray-900'}`}>
+                            <AnimatedNumber value={numValue} />
                         </span>
-                    )}
+                        {unit && <span className="text-[10px] font-bold text-gray-500 self-end mb-1">{unit}</span>}
+                    </div>
+
+                    <div className="w-full h-px bg-red-100/50" />
+
+                    <p className="text-[10px] font-medium text-gray-400 truncate w-full flex items-center justify-between">
+                        <span>{desc}</span>
+                        {trend && (
+                            <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
+                                {getTrendIcon()}
+                            </span>
+                        )}
+                    </p>
                 </div>
-                <div className="relative flex items-baseline gap-1.5">
-                    <span className={`text-2xl font-bold tracking-tight text-gray-900 ${isHealth && numValue < 70 ? 'text-red-600' : ''}`}>
-                        <AnimatedNumber value={numValue} />
-                    </span>
-                    {unit && <span className="text-xs font-semibold text-gray-400">{unit}</span>}
-                </div>
-                <p className="relative text-[10px] font-medium text-gray-400 mt-1 truncate">{desc}</p>
             </div>
         );
     }
 
+    // Default Full Card (fallback or standard usage)
     return (
-        <div className={`relative p-6 rounded-2xl bg-white/90 backdrop-blur-md border border-gray-100/80 shadow-sm group hover:shadow-xl hover:shadow-red-100/20 hover:-translate-y-1 transition-all duration-500 overflow-hidden console-metric-glow ${isHealth && numValue < 50 ? 'ring-2 ring-red-200' : ''}`}>
-            {/* Animated top accent */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
-            {/* Hover glow background */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-50/0 to-rose-50/0 group-hover:from-red-50/30 group-hover:to-rose-50/20 transition-all duration-500" />
-
-            <div className="relative flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${color}12` }}>
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                    </div>
-                    <span className="text-[12px] font-semibold text-gray-500 uppercase tracking-wide">{label}</span>
-                </div>
-                {trend && typeof trend === 'string' && (
-                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${getTrendColor()}`}>
-                        {getTrendIcon()}
-                        {trend}
-                    </span>
-                )}
-            </div>
-
-            <div className={`relative mb-1.5 flex items-baseline gap-2 ${isHealth ? 'group-hover:scale-[1.02] transition-transform' : ''}`}>
-                <span className={`text-3xl font-bold tracking-tight tabular-nums text-gray-900 ${isHealth && numValue < 70 ? 'text-red-600' : ''}`}>
+        <div className="relative p-6 rounded-2xl bg-white/80 backdrop-blur-xl border border-red-100 shadow-sm transition-all hover:shadow-lg hover:shadow-red-500/5 hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-red-50/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Content similar to above but larger padding/text would go here if needed */}
+            <div className="relative">
+                {/* Reuse compact logic or expand for detail view */}
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{label}</span>
+                <div className="mt-2 text-3xl font-black text-gray-900">
                     <AnimatedNumber value={numValue} />
-                </span>
-                {unit && <span className="text-sm font-semibold text-gray-400">{unit}</span>}
+                    {unit && <span className="text-sm text-gray-400 ml-1 font-bold">{unit}</span>}
+                </div>
+                <p className="mt-2 text-xs font-medium text-gray-500">{desc}</p>
             </div>
-            <p className="relative text-[11px] font-medium text-gray-400">{desc}</p>
         </div>
     );
 };
