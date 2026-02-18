@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useApp } from '@/context/AppContext';
 import { LogStats, TimeRange } from '@/lib/types';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -25,6 +26,7 @@ const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 }));
 
 export default function Dashboard() {
+    const { currentApp } = useApp();
     const [stats, setStats] = useState<LogStats | null>(null);
     const [timeRange, setTimeRange] = useState<TimeRange>('1h');
     const [isLive, setIsLive] = useState(true);
@@ -33,11 +35,13 @@ export default function Dashboard() {
     const particles = useMemo(() => PARTICLES, []);
 
     useEffect(() => {
+        if (!currentApp) return;
+
         let interval: NodeJS.Timeout;
 
         const fetchStats = async () => {
             try {
-                const res = await fetch(`/api/stats?timeRange=${timeRange}`);
+                const res = await fetch(`/api/stats?appId=${currentApp.id}&timeRange=${timeRange}`);
                 if (res.ok) {
                     const data = await res.json();
                     setStats(data);
@@ -53,7 +57,7 @@ export default function Dashboard() {
         }
 
         return () => clearInterval(interval);
-    }, [timeRange, isLive]);
+    }, [currentApp, timeRange, isLive]);
 
     if (!stats) {
         return (

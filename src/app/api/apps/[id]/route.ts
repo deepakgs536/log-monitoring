@@ -3,10 +3,11 @@ import { getApp, updateApp, deleteApp } from '../../../../services/appService';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const app = await getApp(params.id);
+        const { id } = await params;
+        const app = await getApp(id);
         if (!app) {
             return NextResponse.json({ error: 'App not found' }, { status: 404 });
         }
@@ -22,9 +23,10 @@ export async function GET(
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const body = await request.json();
         const { name } = body;
 
@@ -32,7 +34,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
-        const updatedApp = await updateApp(params.id, name);
+        const updatedApp = await updateApp(id, name);
         if (!updatedApp) {
             return NextResponse.json({ error: 'App not found' }, { status: 404 });
         }
@@ -46,10 +48,11 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const success = await deleteApp(params.id);
+        const { id } = await params;
+        const success = await deleteApp(id);
         if (!success) {
             return NextResponse.json({ error: 'App not found' }, { status: 404 });
         }

@@ -29,18 +29,6 @@ export const MetricCard = ({ label, value, unit, color, desc, trend, compact }: 
         return trend.isPositive ? up : down;
     };
 
-    const getTrendColor = () => {
-        if (!trend) return '';
-        const good = 'text-red-600 bg-red-50 border-red-100';
-        const bad = 'text-gray-600 bg-gray-100 border-gray-200';
-
-        if (typeof trend === 'string') {
-            const isGood = ['Normal', 'Healthy', 'Fast', 'Optimal'].includes(trend);
-            return isGood ? good : bad;
-        }
-        return trend.isPositive ? good : bad; // Simplification: assume positive trend is "good" or use red for "active"
-    };
-
     // Compact Premium Red Design
     if (compact) {
         return (
@@ -64,8 +52,6 @@ export const MetricCard = ({ label, value, unit, color, desc, trend, compact }: 
                         </span>
                         {unit && <span className="text-[10px] font-bold text-gray-500 self-end mb-1">{unit}</span>}
                     </div>
-
-                    <div className="w-full h-px bg-red-100/50" />
 
                     <p className="text-[10px] font-medium text-gray-400 truncate w-full flex items-center justify-between">
                         <span>{desc}</span>

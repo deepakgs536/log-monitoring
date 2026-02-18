@@ -59,3 +59,6 @@ storage/logs.ndjson
 - **Batching**: Reduces disk I/O syscalls by writing in chunks.
 - **Validation**: Ensures no malformed data corrupts the storage.
 - **Graceful Buffering**: Auto-flushes based on size (100 logs) or time (2s).
+
+
+npx ts-node scripts/verifyMultiApp.ts --api-key=f397d7353d288a2e71d1c4aa51aa525d --count=500
