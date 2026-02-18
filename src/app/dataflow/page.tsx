@@ -37,11 +37,11 @@ export default function WorkflowPage() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
                 <Link
-                    href="/console"
+                    href="/"
                     className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-red-500 mb-6 transition-all duration-300 group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Console
+                    Back to Home
                 </Link>
                 <div className="flex items-center gap-3.5">
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-200/50">

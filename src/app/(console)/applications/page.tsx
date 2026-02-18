@@ -1,17 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '@/context/AppContext';
 import { Application } from '@/lib/types';
 import { Trash2, Eye, EyeOff, Edit2, Check, X, Search, Copy, Terminal, Plus, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ApplicationsPage() {
-    const { apps, updateApp, deleteApp, isLoading, currentApp, switchApp } = useApp();
+    const { apps, updateApp, deleteApp, isLoading, currentApp, switchApp, createApp } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+
+    // Create Modal State
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [createdApp, setCreatedApp] = useState<Application | null>(null);
+    const [newAppName, setNewAppName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    // Create Handler
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newAppName.trim()) return;
+
+        setIsSubmitting(true);
+        try {
+            const app = await createApp(newAppName);
+            if (app) {
+                setCreatedApp(app);
+                setNewAppName('');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     // Delete Modal State
     const [deletingApp, setDeletingApp] = useState<Application | null>(null);
@@ -104,8 +130,8 @@ export default function ApplicationsPage() {
                                 />
                             </div>
                             <button
-                                onClick={() => document.getElementById('create-app-trigger')?.click()}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all"
+                                onClick={() => setIsCreateOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:cursor-pointer hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all"
                             >
                                 <Plus className="w-4 h-4" />
                                 <span>New App</span>
@@ -272,6 +298,106 @@ export default function ApplicationsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* Create App Modal */}
+            {isCreateOpen && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div
+                        ref={modalRef}
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100"
+                    >
+                        {createdApp ? (
+                            // Success View with API Key
+                            <>
+                                <div className="px-6 py-5 border-b border-gray-100 bg-green-50/50">
+                                    <div className="flex items-center gap-2 text-green-600 mb-1">
+                                        <div className="p-1 bg-green-100 rounded-full"><Check className="w-4 h-4" /></div>
+                                        <h3 className="text-lg font-bold text-gray-900">Application Created!</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-500">Your application is ready. Use this API Key to send logs.</p>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">API Key</label>
+                                        <div className="relative">
+                                            <code className="block w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-sm font-mono text-gray-800 break-all select-all">
+                                                {createdApp.apiKey}
+                                            </code>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(createdApp?.apiKey || '');
+                                                    setCopied(true);
+                                                    setTimeout(() => setCopied(false), 2000);
+                                                }}
+                                                className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md transition-all"
+                                                title="Copy to clipboard"
+                                            >
+                                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-red-500 mt-2">
+                                            Save this key securely! You won't be able to see it again.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="px-6 py-4 bg-gray-50 flex items-center justify-end">
+                                    <button
+                                        onClick={() => {
+                                            setCreatedApp(null);
+                                            setIsCreateOpen(false);
+                                        }}
+                                        className="px-6 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-lg shadow-green-500/20 transition-all"
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            // Create Form
+                            <>
+                                <div className="px-6 py-5 border-b border-gray-100">
+                                    <h3 className="text-lg font-bold text-gray-900">Create Application</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Add a new application to monitor logs separately.</p>
+                                </div>
+
+                                <form onSubmit={handleCreate}>
+                                    <div className="p-6 space-y-4">
+                                        <div className="space-y-2">
+                                            <label htmlFor="appName" className="text-sm font-medium text-gray-700">Application Name</label>
+                                            <input
+                                                id="appName"
+                                                type="text"
+                                                value={newAppName}
+                                                onChange={(e) => setNewAppName(e.target.value)}
+                                                placeholder="e.g. Payment Service"
+                                                className="mt-2 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                                autoFocus
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCreateOpen(false)}
+                                            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={!newAppName.trim() || isSubmitting}
+                                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-lg shadow-red-500/30 transition-all"
+                                        >
+                                            {isSubmitting ? 'Creating...' : 'Create App'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );

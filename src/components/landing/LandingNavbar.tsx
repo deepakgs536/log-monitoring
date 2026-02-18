@@ -9,7 +9,6 @@ const navLinks = [
     { label: 'Features', href: '#features' },
     { label: 'Integrations', href: '#integrations' },
     { label: 'How it Works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
 ];
 
 export default function LandingNavbar() {
@@ -103,6 +102,12 @@ export default function LandingNavbar() {
                             </a>
                         ))}
                         <div className="w-[1px] h-6 bg-gray-200 mx-2" />
+                        <Link
+                            href="/dataflow"
+                            className="group ml-1 px-5 py-2 text-[13px] font-semibold text-red-500 border border-red-500 rounded-full shadow-lg shadow-red-200/30 hover:shadow-red-300/50 hover:scale-105 active:scale-[0.98] transition-all duration-300 inline-flex items-center gap-1.5"
+                        >
+                            System Data Flow
+                        </Link>
                         <Link
                             href="/console"
                             className="group ml-1 px-5 py-2 text-[13px] font-semibold text-white bg-gradient-to-r from-red-500 to-rose-600 rounded-full shadow-lg shadow-red-200/30 hover:shadow-red-300/50 hover:scale-105 active:scale-[0.98] transition-all duration-300 inline-flex items-center gap-1.5"
