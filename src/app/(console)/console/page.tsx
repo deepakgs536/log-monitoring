@@ -7,13 +7,14 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { TelemetryChart } from '@/components/dashboard/TelemetryChart';
 import { DistributionDonut } from '@/components/dashboard/DistributionDonut';
+import { ServiceActivityChart } from '@/components/dashboard/ServiceActivityChart';
 import { LogFeedTable } from '@/components/dashboard/LogFeedTable';
 import { SimulationControls } from '@/components/dashboard/SimulationControls';
 import { SystemHealthPanel } from '@/components/dashboard/SystemHealthPanel';
 import { DegradedBanner } from '@/components/dashboard/DegradedBanner';
 import { THEME } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, ShieldAlert, Zap, ChevronUp, ChevronDown, Activity, Radio, Sparkles, Layers, BarChart3 } from 'lucide-react';
+import { Terminal, ShieldAlert, Zap, ChevronUp, ChevronDown, Activity, Radio, Sparkles, Layers, BarChart3, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
@@ -161,46 +162,73 @@ export default function Dashboard() {
                     <div className="section-divider" />
 
                     {/* Layer 1: Metric Cards — Staggered Entrance */}
-                    <section className="space-y-3">
-                        {/* Section heading */}
+                    {/* Layer 1: Key Metrics & Top Services (Combined) */}
+                    <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+                        {/* Left Column: Metrics Grid (2x2) */}
                         <motion.div
                             initial={{ opacity: 0, x: -12 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="flex items-center gap-2.5"
+                            className="lg:col-span-5 flex flex-col gap-4"
                         >
-                            <div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-rose-400" />
-                            <BarChart3 className="w-4 h-4 text-red-400" />
-                            <h2 className="text-sm font-black text-gray-700 uppercase tracking-wider">Key Metrics</h2>
-                            <div className="flex-1 section-divider ml-3" />
+                            <div className="flex items-center gap-2.5 mb-1">
+                                <div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-rose-400" />
+                                <BarChart3 className="w-4 h-4 text-red-400" />
+                                <h2 className="text-sm font-black text-gray-700 uppercase tracking-wider">Key Metrics</h2>
+                                <div className="flex-1 section-divider ml-3" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 h-full">
+                                {[
+                                    { label: 'Health', value: stats.metrics.healthScore, unit: '%', color: stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.warning : THEME.error, desc: 'System integrity' },
+                                    { label: 'TPS', value: stats.metrics.logsPerSecond, unit: 'LPS', color: THEME.accentPurple, desc: 'Ingestion rate' },
+                                    { label: 'Error', value: (stats.metrics.errorRate * 100).toFixed(1), unit: '%', color: THEME.error, desc: 'Failure rate' },
+                                    { label: 'Latency', value: stats.metrics.avgLatency, unit: 'ms', color: THEME.accentCyan, desc: 'Response time' },
+                                ].map((card, i) => (
+                                    <motion.div key={card.label} custom={i} initial="hidden" animate="visible" variants={cardVariants} className="h-full">
+                                        <MetricCard {...card} compact />
+                                    </motion.div>
+                                ))}
+                            </div>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {[
-                                { label: 'Health', value: stats.metrics.healthScore, unit: '%', color: stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.warning : THEME.error, desc: 'System integrity' },
-                                { label: 'TPS', value: stats.metrics.logsPerSecond, unit: 'LPS', color: THEME.accentPurple, desc: 'Ingestion rate' },
-                                { label: 'Error', value: (stats.metrics.errorRate * 100).toFixed(1), unit: '%', color: THEME.error, desc: 'Failure rate' },
-                                { label: 'Latency', value: stats.metrics.avgLatency, unit: 'ms', color: THEME.accentCyan, desc: 'Response time' },
-                            ].map((card, i) => (
-                                <motion.div key={card.label} custom={i} initial="hidden" animate="visible" variants={cardVariants}>
-                                    <MetricCard {...card} compact />
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {/* Charts Row */}
+                        {/* Right Column: Service Activity Chart (Top Services) */}
                         <motion.div
-                            initial="hidden" animate="visible" variants={sectionVariants}
-                            className="grid grid-cols-1 xl:grid-cols-12 gap-4"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="lg:col-span-7 flex flex-col"
                         >
-                            <div className="xl:col-span-8 console-card-premium min-h-[450px]">
-                                <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
+                            {/* Header for Top Services */}
+                            <div className="flex items-center gap-2.5 mb-5 hidden lg:flex">
+                                <div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-rose-400" />
+                                <TrendingUp className="w-4 h-4 text-red-400" />
+                                <h2 className="text-sm font-black text-gray-700 uppercase tracking-wider">Top Services</h2>
+                                <div className="flex-1 section-divider ml-3" />
                             </div>
-                            <div className="xl:col-span-4 console-card-premium min-h-[450px]">
-                                <DistributionDonut data={stats.distribution} />
+
+                            <div className="flex-1 console-card-premium min-h-[300px] lg:min-h-0 p-1">
+                                <ServiceActivityChart data={stats.serviceDistribution} />
                             </div>
                         </motion.div>
                     </section>
+
+                    {/* Section Divider */}
+                    <div className="section-divider" />
+
+                    {/* Layer 2: Main Telemetry Charts */}
+                    <motion.section
+                        initial="hidden" animate="visible" variants={sectionVariants}
+                        className="grid grid-cols-1 lg:grid-cols-[70%_27%] gap-8"
+                    >
+                        <div className="console-card-premium min-h-[400px]">
+                            <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
+                        </div>
+                        <div className="console-card-premium min-h-[400px]">
+                            <DistributionDonut data={stats.distribution} />
+                        </div>
+                    </motion.section>
 
                     {/* Section Divider */}
                     <div className="section-divider" />

@@ -16,93 +16,72 @@ export const SystemHealthPanel = ({ metrics }: SystemHealthPanelProps) => {
     const status = statusConfig[metrics.status];
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-red-100 bg-white/60 backdrop-blur-xl shadow-sm transition-all hover:shadow-md hover:shadow-red-500/5 group">
-            {/* Premium Top Accent */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500/20 via-red-500/40 to-red-500/20 opacity-50" />
+        <div className="relative overflow-hidden rounded-xl border border-red-100 bg-white/80 backdrop-blur-md shadow-lg group h-[60px] flex items-center px-6 transition-all hover:shadow-xl hover:shadow-red-500/10">
+            {/* Premium Top Accent - Subtle */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500/10 via-red-500/40 to-red-500/10 opacity-70" />
 
-            <div className="p-4 sm:p-5">
-                {/* Header Section */}
-                <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${status.bg} ${status.border} border shadow-sm`}>
-                            <Activity className={`w-4 h-4 ${status.color}`} />
-                        </div>
-                        <div>
-                            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">System Reliability</h2>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <div className="relative flex h-2 w-2">
-                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status.icon}`} />
-                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${status.icon}`} />
-                                </div>
-                                <span className={`text-sm font-bold tracking-tight ${status.color}`}>
-                                    {status.label}
-                                </span>
-                            </div>
-                        </div>
+            <div className="flex items-center gap-6 w-full">
+                {/* Title & Status */}
+                <div className="flex flex-col border-r border-red-100 pr-6 min-w-[200px] justify-center">
+                    <div className="flex items-center gap-2 mb-0.5">
+                        <Activity className={`w-4 h-4 ${status.color}`} />
+                        <span className="text-xs font-bold text-gray-700 uppercase tracking-widest leading-none">System Reliability</span>
                     </div>
-
-                    <div className="flex items-center gap-4">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Uptime</p>
-                            <p className="text-sm font-mono font-bold text-gray-900 tabular-nums">99.99%</p>
+                    <div className="flex items-center gap-1.5 pl-0.5">
+                        <div className="relative flex h-2 w-2">
+                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status.icon}`} />
+                            <span className={`relative inline-flex rounded-full h-2 w-2 ${status.icon}`} />
                         </div>
-                        <div className={`p-2 rounded-lg bg-white border border-gray-100 text-gray-400 shadow-sm`}>
-                            <Shield className="w-4 h-4" />
-                        </div>
+                        <span className={`text-sm font-bold tracking-tight ${status.color} leading-none`}>
+                            {status.label}
+                        </span>
                     </div>
                 </div>
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Metrics Row */}
+                <div className="flex items-center justify-between flex-1 px-4">
                     {/* Buffer Status */}
-                    <div className="relative group/card overflow-hidden rounded-xl border border-red-100/50 bg-white/50 p-3.5 hover:bg-white hover:border-red-200/60 hover:shadow-sm transition-all duration-300">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ingestion Buffer</span>
-                            <Database className="w-3.5 h-3.5 text-red-200 group-hover/card:text-red-400 transition-colors" />
-                        </div>
-                        <div className="flex items-baseline gap-1 mb-2">
-                            <span className="text-xl font-black text-gray-900 tabular-nums tracking-tight">{metrics.bufferSize.toFixed(1)}</span>
-                            <span className="text-[10px] font-bold text-gray-400">%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-red-100/30 rounded-full overflow-hidden">
-                            <div
-                                className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.4)] transition-all duration-500"
-                                style={{ width: `${metrics.bufferSize}%` }}
-                            />
+                    <div className="flex flex-col justify-center">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Ingestion Buffer</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-20 h-1.5 bg-red-100/50 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-500"
+                                    style={{ width: `${metrics.bufferSize}%` }}
+                                />
+                            </div>
+                            <span className="text-lg font-mono font-black text-gray-800 tracking-tight leading-none">{metrics.bufferSize.toFixed(1)}%</span>
                         </div>
                     </div>
 
                     {/* Processing Latency */}
-                    <div className="relative group/card overflow-hidden rounded-xl border border-red-100/50 bg-white/50 p-3.5 hover:bg-white hover:border-red-200/60 hover:shadow-sm transition-all duration-300">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Detection Lag</span>
-                            <Workflow className="w-3.5 h-3.5 text-red-200 group-hover/card:text-red-400 transition-colors" />
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                            <span className={`text-xl font-black tabular-nums tracking-tight ${metrics.detectionLatency > 500 ? 'text-red-600' : 'text-gray-900'
-                                }`}>
+                    <div className="flex flex-col pl-6 border-l border-red-50 justify-center">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Detection Lag</span>
+                        <div className="flex items-baseline gap-1.5">
+                            <Workflow className="w-3.5 h-3.5 text-red-300 relative top-0.5" />
+                            <span className={`text-lg font-mono font-black tracking-tighter leading-none ${metrics.detectionLatency > 500 ? 'text-red-600' : 'text-gray-900'}`}>
                                 {metrics.detectionLatency}
                             </span>
                             <span className="text-[10px] font-bold text-gray-400">ms</span>
                         </div>
-                        <div className="mt-2 flex items-center gap-1.5">
-                            <div className={`h-1 w-1 rounded-full ${metrics.detectionLatency > 200 ? 'bg-amber-400' : 'bg-red-400'}`} />
-                            <span className="text-[10px] font-medium text-gray-400">Internal Loop</span>
-                        </div>
                     </div>
 
                     {/* Active Streams */}
-                    <div className="relative group/card overflow-hidden rounded-xl border border-red-100/50 bg-white/50 p-3.5 hover:bg-white hover:border-red-200/60 hover:shadow-sm transition-all duration-300">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active Streams</span>
-                            <Server className="w-3.5 h-3.5 text-red-200 group-hover/card:text-red-400 transition-colors" />
+                    <div className="flex flex-col pl-6 border-l border-red-50 justify-center">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Active Streams</span>
+                        <div className="flex items-center gap-1.5">
+                            <Server className="w-3.5 h-3.5 text-red-300" />
+                            <span className="text-lg font-mono font-black text-gray-900 tracking-tighter leading-none">{metrics.activeStreams}</span>
                         </div>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-black text-gray-900 tabular-nums tracking-tight">{metrics.activeStreams}</span>
-                        </div>
-                        <div className="mt-2 text-[10px] font-medium text-gray-400">
-                            Across 3 clusters
-                        </div>
+                    </div>
+                </div>
+
+                {/* Uptime (Far Right) */}
+                <div className="flex flex-col items-end justify-center gap-0.5 border-l border-red-100 pl-6 ml-auto h-full py-1">
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Uptime</span>
+                    <div className="flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="text-lg font-mono font-black text-gray-900 leading-none">99.99%</span>
                     </div>
                 </div>
             </div>

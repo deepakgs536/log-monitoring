@@ -32,13 +32,10 @@ export const MetricCard = ({ label, value, unit, color, desc, trend, compact }: 
     // Compact Premium Red Design
     if (compact) {
         return (
-            <div className={`relative p-4 sm:p-5 rounded-2xl bg-white/70 backdrop-blur-xl border border-red-100 shadow-sm transition-all duration-300 hover:shadow-md hover:shadow-red-500/10 hover:-translate-y-0.5 group overflow-hidden ${isHealth && numValue < 80 ? 'ring-1 ring-red-400 bg-red-50/30' : ''}`}>
+            <div className={`relative p-4 sm:p-5 rounded-2xl bg-[#fefefe] backdrop-blur-xl border border-red-100 shadow-sm transition-all duration-300 hover:shadow-md hover:shadow-red-500/10 hover:-translate-y-0.5 group overflow-hidden ${isHealth && numValue < 80 ? 'ring-1 ring-red-400 bg-red-50/30' : ''}`}>
 
                 {/* Subtle Red Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-red-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                {/* Accent Bar */}
-                <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-red-500/20 rounded-r-full group-hover:bg-red-500/50 transition-colors" />
 
                 <div className="relative flex flex-col items-start gap-3">
                     <div className="flex items-center justify-between w-full">

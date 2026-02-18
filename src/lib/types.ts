@@ -75,6 +75,7 @@ export type TimeRange = '1m' | '15m' | '1h' | '6h' | '12h' | '24h' | '1d' | '1w'
 
 export interface LogStats {
     distribution: { name: string; value: number }[];
+    serviceDistribution: { name: string; value: number }[];
     timeline: { time: string; info: number; warn: number; error: number; timestamp: number }[];
     total: number;
     recentLogs: Log[];

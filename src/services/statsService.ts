@@ -260,6 +260,7 @@ export async function getLogStats(appId: string, timeRange: TimeRange = '1h'): P
         } catch {
             return {
                 distribution: [],
+                serviceDistribution: [],
                 timeline: [],
                 total: 0,
                 recentLogs: [],
@@ -346,12 +347,23 @@ export async function getLogStats(appId: string, timeRange: TimeRange = '1h'): P
 
         const distribution = Array.from(distributionMap.entries()).map(([name, value]) => ({ name, value }));
 
+        const serviceMap = new Map<string, number>();
+        for (const log of allLogs) {
+            const service = log.service || 'unknown';
+            serviceMap.set(service, (serviceMap.get(service) || 0) + 1);
+        }
+        const serviceDistribution = Array.from(serviceMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5); // Top 5 services
+
         const timeline = Array.from(timelineMap.entries())
             .map(([time, data]) => ({ time, ...data }))
             .sort((a, b) => a.timestamp - b.timestamp);
 
         return {
             distribution,
+            serviceDistribution,
             timeline,
             total: allLogs.length,
             recentLogs: allLogs.slice(-15).reverse(),
@@ -363,6 +375,7 @@ export async function getLogStats(appId: string, timeRange: TimeRange = '1h'): P
         console.error(`Error reading stats for app ${appId}:`, error);
         return {
             distribution: [],
+            serviceDistribution: [],
             timeline: [],
             total: 0,
             recentLogs: [],
