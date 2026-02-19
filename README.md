@@ -33,25 +33,61 @@ Logs follow a structured JSON format optimized for observability:
 ## 🛠 Usage
 
 ### 1. Start the Server
+First, run the development server:
+
 ```bash
 npm run dev
 ```
-The API will be available at `POST http://localhost:3000/api/logs`.
 
-### 2. Generate Traffic (Load Test)
-Run the specialized load generator script to simulate production traffic:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### 2. Generate Traffic (Load Simulation)
+To see the log ingestion in action, you need to send data to the API. We have a specialized script for this:
 
 ```bash
 npx tsx scripts/generateLogs.ts
 ```
-This script sends batches of valid logs to the API, testing the entire pipeline.
 
-### 3. Verify Output
-Logs are written to:
-```
-storage/logs.ndjson
-```
-(NDJSON = Newline Delimited JSON, a standard for log files).
+This script will:
+- Simulate multiple services (`user-service`, `payment-service`, etc.).
+- Send batches of logs to `POST /api/logs`.
+- Mix different log levels (`info`, `error`, `debug`).
+
+### 3. Monitoring Logs
+Once the server is running and logs are being generated, you can monitor them in real-time via the **Console**.
+
+- **Dashboard**: Provides a high-level overview of log volume, error rates, and active alerts.
+- **Live Stream**: Watches logs flow in real-time via WebSocket.
+- **Log Explorer**: Search and filter historical logs by service, level, or text content.
+
+### 4. Managing Applications (CRUD)
+The system supports multiple applications, each with its own API Key for secure ingestion.
+
+Navigate to the **Applications** page in the Console to manage them.
+
+#### **Create (Register a New App)**
+1. Click the **"New App"** button.
+2. Enter a name for your application (e.g., `Payment Gateway`).
+3. Click **Create**.
+4. **Important**: Copy the generated **API Key** immediately. It is only shown once.
+
+#### **Read (View Apps)**
+- The Applications page lists all registered apps.
+- You can see the App Name, ID, and active status.
+- Click the **Eye** icon to reveal the API Key (if you have permission).
+
+#### **Update (Rename App)**
+1. Hover over an application card.
+2. Click the **Edit** (pencil) icon next to the app name.
+3. Enter the new name.
+4. Click the **Check** icon to save.
+
+#### **Delete (Remove App)**
+1. Hover over an application card.
+2. Click the **Trash** icon.
+3. A confirmation modal will appear.
+4. Type the **exact name** of the application to confirm deletion.
+5. Click **Delete App**. This action is irreversible.
 
 ## ⚡ Performance Features
 
@@ -59,6 +95,3 @@ storage/logs.ndjson
 - **Batching**: Reduces disk I/O syscalls by writing in chunks.
 - **Validation**: Ensures no malformed data corrupts the storage.
 - **Graceful Buffering**: Auto-flushes based on size (100 logs) or time (2s).
-
-
-npx ts-node scripts/verifyMultiApp.ts --api-key=f397d7353d288a2e71d1c4aa51aa525d --count=500

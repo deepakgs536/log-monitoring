@@ -129,24 +129,8 @@ export default function Dashboard() {
             <div className="console-ambient-orb w-[500px] h-[500px] bg-rose-200/15 bottom-0 -left-32 fixed" />
             <div className="console-ambient-orb w-[300px] h-[300px] bg-orange-100/20 top-1/2 right-1/4 fixed" />
 
-            {/* Floating particles */}
-            {particles.map((p) => (
-                <div
-                    key={p.id}
-                    className="fixed rounded-full bg-red-300/15 animate-particle-float pointer-events-none z-0"
-                    style={{
-                        left: p.left,
-                        top: p.top,
-                        width: p.size,
-                        height: p.size,
-                        animationDelay: `${p.delay}s`,
-                        animationDuration: `${p.duration}s`,
-                    }}
-                />
-            ))}
-
             <main className="flex-1 flex flex-col relative z-10">
-                <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 space-y-5">
+                <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 space-y-4">
                     {/* Layer 0: System Reliability & Notifications */}
                     <motion.div
                         initial={{ opacity: 0, y: 12 }}
@@ -163,7 +147,7 @@ export default function Dashboard() {
 
                     {/* Layer 1: Metric Cards — Staggered Entrance */}
                     {/* Layer 1: Key Metrics & Top Services (Combined) */}
-                    <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
                         {/* Left Column: Metrics Grid (2x2) */}
                         <motion.div
@@ -179,7 +163,7 @@ export default function Dashboard() {
                                 <div className="flex-1 section-divider ml-3" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 h-full">
+                            <div className="grid grid-cols-2 gap-4 h-full">
                                 {[
                                     { label: 'Health', value: stats.metrics.healthScore, unit: '%', color: stats.metrics.healthScore > 80 ? THEME.success : stats.metrics.healthScore > 50 ? THEME.warning : THEME.error, desc: 'System integrity' },
                                     { label: 'TPS', value: stats.metrics.logsPerSecond, unit: 'LPS', color: THEME.accentPurple, desc: 'Ingestion rate' },
@@ -220,7 +204,7 @@ export default function Dashboard() {
                     {/* Layer 2: Main Telemetry Charts */}
                     <motion.section
                         initial="hidden" animate="visible" variants={sectionVariants}
-                        className="grid grid-cols-1 lg:grid-cols-[70%_27%] gap-8"
+                        className="grid grid-cols-1 lg:grid-cols-[70%_28%] gap-4"
                     >
                         <div className="console-card-premium min-h-[400px]">
                             <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
@@ -236,7 +220,7 @@ export default function Dashboard() {
                     {/* Layer 2: Investigation Workspace */}
                     <motion.section
                         initial="hidden" animate="visible" variants={sectionVariants}
-                        className="space-y-5"
+                        className="space-y-4"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
@@ -256,7 +240,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* Logs Stream — Premium Card */}
-                        <div className="flex flex-col console-card-premium min-h-[500px]">
+                        <div className="flex flex-col console-card-premium max-h-[500px]">
                             <div className="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-white via-white to-red-50/40 flex items-center justify-between relative">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">

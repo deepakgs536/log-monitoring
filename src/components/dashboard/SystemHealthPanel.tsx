@@ -17,8 +17,6 @@ export const SystemHealthPanel = ({ metrics }: SystemHealthPanelProps) => {
 
     return (
         <div className="relative overflow-hidden rounded-xl border border-red-100 bg-white/80 backdrop-blur-md shadow-lg group h-[60px] flex items-center px-6 transition-all hover:shadow-xl hover:shadow-red-500/10">
-            {/* Premium Top Accent - Subtle */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500/10 via-red-500/40 to-red-500/10 opacity-70" />
 
             <div className="flex items-center gap-6 w-full">
                 {/* Title & Status */}
@@ -44,7 +42,7 @@ export const SystemHealthPanel = ({ metrics }: SystemHealthPanelProps) => {
                     <div className="flex flex-col justify-center">
                         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Ingestion Buffer</span>
                         <div className="flex items-center gap-2">
-                            <div className="w-20 h-1.5 bg-red-100/50 rounded-full overflow-hidden">
+                            <div className="w-[90px] h-1.5 bg-red-100/50 rounded-full overflow-hidden">
                                 <div
                                     className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-500"
                                     style={{ width: `${metrics.bufferSize}%` }}
