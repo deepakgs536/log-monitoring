@@ -15,17 +15,22 @@ export async function queryLogs(appId: string, params: LogQueryParams): Promise<
             return [];
         }
 
-        const fileContent = await fs.readFile(logFile, 'utf8');
-        const lines = fileContent.split('\n');
-        const results: Log[] = [];
+        // Use simple stream reading
+        const fileStream = require('fs').createReadStream(logFile, { encoding: 'utf8' });
+        const rl = require('readline').createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
 
-        // Process in reverse to get newest first
-        for (let i = lines.length - 1; i >= 0; i--) {
-            const line = lines[i].trim();
-            if (!line) continue;
+        let results: Log[] = [];
+
+        // We process lines forward since it's a stream. We'll collect matches, and at the end take the last N items for reverse-chronological order.
+        for await (const line of rl) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
 
             try {
-                const log: Log = JSON.parse(line);
+                const log: Log = JSON.parse(trimmed);
 
                 // Apply filters
                 if (params.level && params.level !== 'all' && log.level !== params.level) continue;
@@ -47,16 +52,26 @@ export async function queryLogs(appId: string, params: LogQueryParams): Promise<
 
                 results.push(log);
 
-                if (params.limit && results.length >= params.limit) {
-                    break;
+                // Optional: To avoid memory blowing up mid-stream, we could cap the array.
+                // However, we want the NEWEST logs (end of file) so we have to trim the oldest (front).
+                // Doing this on every push is O(n), so we'll just let it accumulate matches (filtered sets are usually small)
+                // If it gets too large, we trim the start.
+                if (params.limit && results.length > params.limit * 2) {
+                    results = results.slice(-params.limit); // Keep only the latest 
                 }
+
             } catch (e) {
-                console.warn('Failed to parse log line:', line);
+                // Ignore parse errors on individual lines
                 continue;
             }
         }
 
-        return results;
+        // We want the most recent logs first, so we return the end of the array reversed
+        if (params.limit && results.length > params.limit) {
+            results = results.slice(-params.limit);
+        }
+
+        return results.reverse();
     } catch (error) {
         console.error(`Error querying logs for app ${appId}:`, error);
         return [];

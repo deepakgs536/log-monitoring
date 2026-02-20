@@ -14,18 +14,20 @@ export function processBatch(appId: string, logs: any[]): IngestionResponse {
     let accepted = 0;
     let rejected = 0;
 
-    if (!Array.isArray(logs)) {
-        return { accepted: 0, rejected: 0 };
-    }
+    const validLogs: any[] = [];
 
     for (const log of logs) {
         if (validateLog(log)) {
             push(appId, log);
-            broadcastLogs(appId, [log]);
+            validLogs.push(log);
             accepted++;
         } else {
             rejected++;
         }
+    }
+
+    if (validLogs.length > 0) {
+        broadcastLogs(appId, validLogs);
     }
 
     return { accepted, rejected };

@@ -6,6 +6,30 @@ import crypto from 'crypto';
 const STORAGE_DIR = path.join(process.cwd(), 'storage');
 const APPS_FILE = path.join(STORAGE_DIR, 'apps.json');
 
+// Memory lock for file writing (simple mutex for a single node instance)
+let isWriting = false;
+const writeQueue: (() => void)[] = [];
+
+async function acquireLock(): Promise<void> {
+    return new Promise((resolve) => {
+        if (!isWriting) {
+            isWriting = true;
+            resolve();
+        } else {
+            writeQueue.push(resolve);
+        }
+    });
+}
+
+function releaseLock() {
+    if (writeQueue.length > 0) {
+        const next = writeQueue.shift();
+        if (next) next();
+    } else {
+        isWriting = false;
+    }
+}
+
 // Ensure storage directory exists
 async function ensureStorage() {
     try {
@@ -25,8 +49,13 @@ async function getAppsFileContent(): Promise<Application[]> {
 }
 
 async function saveApps(apps: Application[]) {
-    await ensureStorage();
-    await fs.writeFile(APPS_FILE, JSON.stringify(apps, null, 2));
+    await acquireLock();
+    try {
+        await ensureStorage();
+        await fs.writeFile(APPS_FILE, JSON.stringify(apps, null, 2));
+    } finally {
+        releaseLock();
+    }
 }
 
 export async function getApps(): Promise<Application[]> {
