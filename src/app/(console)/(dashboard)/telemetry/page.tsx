@@ -1,19 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogStats, TimeRange } from '@/lib/types';
+import { LogStats } from '@/lib/types';
 import { TelemetryChart } from '@/components/dashboard/TelemetryChart';
 import { DistributionDonut } from '@/components/dashboard/DistributionDonut';
 import { MetricCard } from '@/components/dashboard/MetricCard';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { THEME } from '@/components/dashboard/constants';
-
 import { useApp } from '@/context/AppContext';
+import { useConsole } from '@/context/ConsoleContext';
 
 export default function TelemetryPage() {
     const [stats, setStats] = useState<LogStats | null>(null);
-    const [timeRange, setTimeRange] = useState<TimeRange>('1h');
-    const [isLive, setIsLive] = useState(true);
+    const { timeRange, isLive } = useConsole();
     const { currentApp } = useApp();
 
     useEffect(() => {
@@ -42,7 +40,6 @@ export default function TelemetryPage() {
 
     return (
         <div className="p-6 lg:p-10 space-y-8">
-            <DashboardHeader isLive={isLive} timeRange={timeRange} setTimeRange={setTimeRange} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
@@ -59,7 +56,7 @@ export default function TelemetryPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-                <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
+                <TelemetryChart data={stats.timeline} alerts={stats.alerts} timeRange={timeRange} />
                 <DistributionDonut data={stats.distribution} />
             </div>
         </div>

@@ -1,25 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Log, LogLevel, TimeRange } from '@/lib/types';
+import { Log, LogLevel } from '@/lib/types';
 import { LogFeedTable } from '@/components/dashboard/LogFeedTable';
 import { Search, Filter, RefreshCw, Clock, AlertTriangle, Box, Sparkles } from 'lucide-react';
 import { THEME } from '@/components/dashboard/constants';
 import { ExportMenu } from '@/components/dashboard/ExportMenu';
 import { motion } from 'framer-motion';
-
 import { useApp } from '@/context/AppContext';
+import { useConsole } from '@/context/ConsoleContext';
 
 export default function LogsPage() {
     const [logs, setLogs] = useState<Log[]>([]);
     const [loading, setLoading] = useState(false);
     const { currentApp } = useApp();
+    const { timeRange, setTimeRange } = useConsole();
 
     // Filters
     const [search, setSearch] = useState('');
     const [service, setService] = useState<string>('all');
     const [level, setLevel] = useState<LogLevel | 'all'>('all');
-    const [timeRange, setTimeRange] = useState<string>('1h');
 
     const getLogParams = useCallback(() => {
         const now = Date.now();
@@ -171,7 +171,7 @@ export default function LogsPage() {
                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                         <select
                             value={timeRange}
-                            onChange={(e) => setTimeRange(e.target.value)}
+                            onChange={(e) => setTimeRange(e.target.value as import('@/lib/types').TimeRange)}
                             className="w-full bg-gray-50/60 border border-transparent rounded-xl py-2.5 pl-9 pr-8 text-xs font-bold uppercase tracking-wider appearance-none cursor-pointer hover:bg-gray-100 transition-all focus:border-red-200 focus:ring-2 focus:ring-red-100 text-gray-600"
                         >
                             <option value="15m">15m</option>

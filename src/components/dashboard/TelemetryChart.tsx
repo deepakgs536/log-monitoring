@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 interface TelemetryChartProps {
     data: any[];
     alerts: Alert[];
+    timeRange?: string;
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -41,7 +42,11 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null;
 };
 
-export const TelemetryChart = ({ data, alerts }: TelemetryChartProps) => {
+export const TelemetryChart = ({ data, alerts, timeRange = '1h' }: TelemetryChartProps) => {
+    // For 7d: show all 7 date ticks; for dense ranges, thin them out
+    const xAxisInterval = timeRange === '7d' || timeRange === '1w' || timeRange === '1M' || timeRange === '1y'
+        ? 0  // show every tick (only 7 for 7d)
+        : timeRange === '24h' || timeRange === '12h' || timeRange === '6h' ? 2 : 'preserveStartEnd';
     const anomalyZones = alerts.filter(a => a.severity === 'critical').map(a => ({
         x1: new Date(a.timestamp - 5000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         x2: new Date(a.timestamp + 5000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -109,6 +114,7 @@ export const TelemetryChart = ({ data, alerts }: TelemetryChartProps) => {
                             tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
                             dy={15}
                             padding={{ left: 20, right: 20 }}
+                            interval={xAxisInterval}
                         />
                         <YAxis
                             axisLine={false}

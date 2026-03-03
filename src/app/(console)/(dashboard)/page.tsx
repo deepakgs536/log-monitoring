@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogStats, TimeRange } from '@/lib/types';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { LogStats } from '@/lib/types';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { AlertPanel } from '@/components/dashboard/AlertPanel';
 import { TelemetryChart } from '@/components/dashboard/TelemetryChart';
@@ -10,12 +9,12 @@ import { THEME } from '@/components/dashboard/constants';
 import { motion } from 'framer-motion';
 import { Activity, Sparkles } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useConsole } from '@/context/ConsoleContext';
 
 export default function Overview() {
     const { currentApp } = useApp();
+    const { timeRange, isLive } = useConsole();
     const [stats, setStats] = useState<LogStats | null>(null);
-    const [timeRange, setTimeRange] = useState<TimeRange>('1h');
-    const [isLive, setIsLive] = useState(true);
 
     useEffect(() => {
         if (!currentApp) return;
@@ -68,13 +67,6 @@ export default function Overview() {
 
     return (
         <div className="p-6 lg:p-8 space-y-8">
-            <motion.div
-                initial={{ opacity: 0, y: -12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-            >
-                <DashboardHeader isLive={isLive} timeRange={timeRange} setTimeRange={setTimeRange} />
-            </motion.div>
 
             {/* Core Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -99,7 +91,7 @@ export default function Overview() {
                 <div className="space-y-8">
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-premium overflow-hidden hover:shadow-premium-hover transition-all duration-500 group relative">
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500/40 via-rose-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
+                        <TelemetryChart data={stats.timeline} alerts={stats.alerts} timeRange={timeRange} />
                     </div>
                 </div>
                 <div className="space-y-8">

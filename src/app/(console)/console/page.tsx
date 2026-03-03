@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { LogStats, TimeRange } from '@/lib/types';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { useConsole } from '@/context/ConsoleContext';
+import { LogStats } from '@/lib/types';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { TelemetryChart } from '@/components/dashboard/TelemetryChart';
 import { DistributionDonut } from '@/components/dashboard/DistributionDonut';
@@ -28,9 +28,8 @@ const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 
 export default function Dashboard() {
     const { currentApp } = useApp();
+    const { timeRange, isLive } = useConsole();
     const [stats, setStats] = useState<LogStats | null>(null);
-    const [timeRange, setTimeRange] = useState<TimeRange>('1h');
-    const [isLive, setIsLive] = useState(true);
     const [isSimulationOpen, setIsSimulationOpen] = useState(false);
 
     const particles = useMemo(() => PARTICLES, []);
@@ -207,7 +206,7 @@ export default function Dashboard() {
                         className="grid grid-cols-1 lg:grid-cols-[70%_28%] gap-4"
                     >
                         <div className="console-card-premium min-h-[400px]">
-                            <TelemetryChart data={stats.timeline} alerts={stats.alerts} />
+                            <TelemetryChart data={stats.timeline} alerts={stats.alerts} timeRange={timeRange} />
                         </div>
                         <div className="console-card-premium min-h-[400px]">
                             <DistributionDonut data={stats.distribution} />

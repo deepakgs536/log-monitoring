@@ -36,6 +36,10 @@ function formatTimeKey(date: Date, range: TimeRange): string {
             return `${pad(date.getHours())}:${pad(date.getMinutes())} `;
         case '1d':
             return `${pad(date.getHours())}:00`;
+        case '7d': {
+            const yy = String(date.getFullYear()).slice(2);
+            return `${date.getDate()}/${date.getMonth() + 1}/${yy}`;
+        }
         case '1w':
         case '1M':
             return `${date.getMonth() + 1}/${date.getDate()}`;
@@ -57,7 +61,7 @@ function getGranularity(range: TimeRange): number {
         '24h': 60 * 60 * 1000,
         '1d': 60 * 60 * 1000,
         '1w': 6 * 60 * 60 * 1000,
-        '7d': 6 * 60 * 60 * 1000,
+        '7d': 24 * 60 * 60 * 1000,  // one bucket per day → 7 daily labels
         '1M': 24 * 60 * 60 * 1000,
         '1y': 30 * 24 * 60 * 60 * 1000
     };
