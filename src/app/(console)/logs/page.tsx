@@ -8,9 +8,12 @@ import { THEME } from '@/components/dashboard/constants';
 import { ExportMenu } from '@/components/dashboard/ExportMenu';
 import { motion } from 'framer-motion';
 
+import { useApp } from '@/context/AppContext';
+
 export default function LogsPage() {
     const [logs, setLogs] = useState<Log[]>([]);
     const [loading, setLoading] = useState(false);
+    const { currentApp } = useApp();
 
     // Filters
     const [search, setSearch] = useState('');
@@ -29,15 +32,18 @@ export default function LogsPage() {
         if (timeRange === '7d') startTime = now - 7 * 24 * 60 * 60 * 1000;
 
         return {
+            appId: currentApp?.id,
             search: search || undefined,
             service: service === 'all' ? undefined : service,
             level: level === 'all' ? undefined : level,
             startTime,
             limit: 10000
         };
-    }, [search, service, level, timeRange]);
+    }, [search, service, level, timeRange, currentApp?.id]);
 
     const fetchLogs = useCallback(async () => {
+        if (!currentApp?.id) return;
+
         setLoading(true);
         try {
             const params = getLogParams();
@@ -58,7 +64,7 @@ export default function LogsPage() {
         } finally {
             setLoading(false);
         }
-    }, [getLogParams]);
+    }, [getLogParams, currentApp?.id]);
 
     useEffect(() => {
         const timer = setTimeout(() => {

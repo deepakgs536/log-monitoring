@@ -8,17 +8,21 @@ import { MetricCard } from '@/components/dashboard/MetricCard';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { THEME } from '@/components/dashboard/constants';
 
+import { useApp } from '@/context/AppContext';
+
 export default function TelemetryPage() {
     const [stats, setStats] = useState<LogStats | null>(null);
     const [timeRange, setTimeRange] = useState<TimeRange>('1h');
     const [isLive, setIsLive] = useState(true);
+    const { currentApp } = useApp();
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
         const fetchStats = async () => {
+            if (!currentApp?.id) return;
             try {
-                const res = await fetch(`/api/stats?timeRange=${timeRange}`);
+                const res = await fetch(`/api/stats?timeRange=${timeRange}&appId=${currentApp.id}`);
                 const data = await res.json();
                 setStats(data);
             } catch (error) {
@@ -32,7 +36,7 @@ export default function TelemetryPage() {
         }
 
         return () => clearInterval(interval);
-    }, [timeRange, isLive]);
+    }, [timeRange, isLive, currentApp?.id]);
 
     if (!stats) return null;
 

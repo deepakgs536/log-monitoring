@@ -11,18 +11,22 @@ import Link from 'next/link';
 import AppSelector from '../../../../components/layout/AppSelector';
 
 import { useConsole } from '@/context/ConsoleContext';
+import { useApp } from '@/context/AppContext';
 
 export default function IncidentsPage() {
     const [stats, setStats] = useState<LogStats | null>(null);
     const { timeRange, isLive, setTimeRange } = useConsole();
+    const { currentApp } = useApp();
     const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
         const fetchStats = async () => {
+            if (!currentApp?.id) return;
+
             try {
-                const res = await fetch(`/api/stats?timeRange=${timeRange}`);
+                const res = await fetch(`/api/stats?timeRange=${timeRange}&appId=${currentApp.id}`);
                 const data = await res.json();
                 setStats(data);
             } catch (error) {
@@ -36,7 +40,7 @@ export default function IncidentsPage() {
         }
 
         return () => clearInterval(interval);
-    }, [timeRange, isLive]);
+    }, [timeRange, isLive, currentApp?.id]);
 
     if (!stats) {
         return (

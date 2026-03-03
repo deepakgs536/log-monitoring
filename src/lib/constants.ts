@@ -55,7 +55,7 @@ export const NAV_ITEMS = [
     { label: 'Console', path: '/console', icon: Activity },
     { label: 'Incidents', path: '/incidents', icon: AlertTriangle },
     { label: 'Logs', path: '/logs', icon: Terminal },
-    { label: 'Analytics', path: '/analytics', icon: BarChart2 },
+    // { label: 'Analytics', path: '/analytics', icon: BarChart2 },
     { label: 'Applications', path: '/applications', icon: LayoutDashboard },
 ];
 

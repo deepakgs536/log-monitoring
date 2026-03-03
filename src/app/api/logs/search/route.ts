@@ -6,7 +6,8 @@ import { getAppByApiKey } from '@/services/appService';
 
 export async function POST(request: Request) {
     try {
-        let appId = request.headers.get('x-app-id');
+        const body = await request.json();
+        let appId = request.headers.get('x-app-id') || body.appId;
         const apiKey = request.headers.get('x-api-key');
 
         if (apiKey) {
@@ -27,7 +28,6 @@ export async function POST(request: Request) {
             );
         }
 
-        const body = await request.json();
         const params: LogQueryParams = body;
 
         const logs = await queryLogs(appId, params);

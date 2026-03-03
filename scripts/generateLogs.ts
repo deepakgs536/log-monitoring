@@ -45,14 +45,21 @@ const appId = getArg('app-id');
 const batchSizeArg = getArg('batch-size');
 const intervalArg = getArg('interval');
 const totalBatchesArg = getArg('batches');
+const countArg = getArg('count');
 
 const BATCH_SIZE = batchSizeArg ? parseInt(batchSizeArg, 10) : 10;
-const TOTAL_BATCHES = totalBatchesArg ? parseInt(totalBatchesArg, 10) : 100;
+let TOTAL_BATCHES = totalBatchesArg ? parseInt(totalBatchesArg, 10) : 100;
+
+if (countArg) {
+    const count = parseInt(countArg, 10);
+    TOTAL_BATCHES = Math.ceil(count / BATCH_SIZE);
+}
+
 const INTERVAL_MS = intervalArg ? parseInt(intervalArg, 10) : 1000;
 
 if (!apiKey && !appId) {
     console.warn('WARNING: No --api-key or --app-id provided. Logs may be rejected or sent to default app.');
-    console.log('Usage: npx ts-node scripts/generateLogs.ts --api-key=<key> OR --app-id=<id>');
+    console.log('Usage: npx tsx scripts/generateLogs.ts --api-key=<key> OR --app-id=<id>');
 }
 
 async function sendBatch(batch: any[]) {
@@ -87,17 +94,31 @@ async function run() {
 
     let count = 0;
 
-    const interval = setInterval(async () => {
+    const executeBatch = async () => {
         if (count >= TOTAL_BATCHES) {
-            clearInterval(interval);
-            console.log('Done sending batches.');
-            return;
+            return false;
         }
-
         const batch = generateBatch(BATCH_SIZE);
         await sendBatch(batch);
         count++;
+        return true;
+    };
+
+    const shouldContinue = await executeBatch();
+    if (!shouldContinue) {
+        console.log('Done sending batches.');
+        return;
+    }
+
+    const interval = setInterval(async () => {
+        const more = await executeBatch();
+        if (!more) {
+            clearInterval(interval);
+            console.log('Done sending batches.');
+        }
     }, INTERVAL_MS);
 }
 
 run();
+
+export { };

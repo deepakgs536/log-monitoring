@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, FileText, FileJson, Activity, ChevronDown } from 'lucide-react';
 import { LogQueryParams } from '@/lib/types';
+import { useApp } from '@/context/AppContext';
 
 interface ExportMenuProps {
     logParams?: LogQueryParams; // If provided, enables log export
@@ -14,6 +15,7 @@ export const ExportMenu = ({ logParams, showIncidents = true, showSummary = true
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const { currentApp } = useApp();
 
     // Close on click outside
     useEffect(() => {
@@ -34,14 +36,17 @@ export const ExportMenu = ({ logParams, showIncidents = true, showSummary = true
             let body = undefined;
             let method = 'GET';
 
+            const appIdQuery = currentApp?.id ? `?appId=${currentApp.id}` : '';
+
             if (type === 'logs') {
-                url = '/api/reports/logs';
+                url = `/api/reports/logs`;
                 method = 'POST';
-                body = JSON.stringify(logParams || {});
+                // logParams may already contain appId, but we send it anyways
+                body = JSON.stringify({ ...logParams, appId: currentApp?.id });
             } else if (type === 'incidents') {
-                url = '/api/reports/incidents';
+                url = `/api/reports/incidents${appIdQuery}`;
             } else if (type === 'summary') {
-                url = '/api/reports/summary';
+                url = `/api/reports/summary${appIdQuery}`;
             }
 
             const res = await fetch(url, {
