@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Settings, User, Database, Shield, Bell, Palette,
@@ -176,6 +177,7 @@ export default function SettingsPage() {
     // ── Tab & Modal ──
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [activeModal, setActiveModal] = useState<Modal>(null);
+    const router = useRouter();
 
     // ── Toast ──
     const [toast, setToast] = useState<ToastState | null>(null);
@@ -254,6 +256,18 @@ export default function SettingsPage() {
         localStorage.setItem('settings.profile', JSON.stringify(profileDraft));
         setActiveModal(null);
         showToast('Profile updated successfully!');
+    }
+
+    // ── Logout ──
+    async function handleLogout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            router.push('/login');
+        } catch (err) {
+            showToast('Failed to log out', 'error');
+        }
     }
 
     // ── System save ──
@@ -435,6 +449,24 @@ export default function SettingsPage() {
                                                 </div>
                                             </SectionCard>
                                         ))}
+                                    </div>
+
+                                    {/* Logout section */}
+                                    <div className="pt-2">
+                                        <SectionCard className="border-red-100 bg-red-50/20">
+                                            <div className="p-6 flex items-center justify-between gap-4">
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 text-sm">Sign Out</h4>
+                                                    <p className="text-xs text-gray-500 font-medium mt-1">Safely end your session and log out of this device.</p>
+                                                </div>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="shrink-0 flex items-center gap-2 px-6 py-2.5 bg-white border border-red-200 text-red-600 font-bold text-sm rounded-xl shadow-[0_2px_8px_rgba(239,68,68,0.1)] hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200 active:scale-95"
+                                                >
+                                                    <LogOut className="w-4 h-4" /> Sign Out
+                                                </button>
+                                            </div>
+                                        </SectionCard>
                                     </div>
                                 </motion.div>
                             )}

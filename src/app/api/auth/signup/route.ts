@@ -43,11 +43,11 @@ export async function POST(request: Request) {
 
         const token = jwt.sign(
             { userId: user._id, email: user.email, name: user.name },
-            process.env.JWT_SECRET!,
+            process.env.PRIVATE_KEY!,
             { expiresIn: '7d' }
         );
 
-        return NextResponse.json(
+        const response = NextResponse.json(
             {
                 message: 'User created successfully',
                 token,
@@ -55,6 +55,15 @@ export async function POST(request: Request) {
             },
             { status: 201 }
         );
+
+        response.cookies.set('token', token, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 // 7 days
+        });
+
+        return response;
     } catch (error: unknown) {
         console.error('Signup error:', error);
         return NextResponse.json(

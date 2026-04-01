@@ -5,7 +5,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-/* ─── Tech / Kanban board illustration ─── */
+/* ─── Tech / Log Monitoring illustration ─── */
 function TechIllustration() {
   return (
     <svg viewBox="0 0 340 360" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -24,153 +24,65 @@ function TechIllustration() {
       <circle cx="255" cy="88"  r="6"  fill="#fca5a5" opacity="0.45" />
       <circle cx="78"  cy="310" r="5"  fill="#fecaca" opacity="0.4"  />
 
-      {/* ══ KANBAN BOARD (main centrepiece) ══ */}
-      {/* Board surface */}
-      <rect x="72" y="108" width="196" height="168" rx="12" fill="white"
-        stroke="#fecaca" strokeWidth="1.5" />
-      {/* Board header bar */}
-      <rect x="72" y="108" width="196" height="30" rx="12" fill="#dc2626" />
-      <rect x="72" y="126" width="196" height="12" fill="#dc2626" />
-      {/* Header dots */}
-      <circle cx="90"  cy="123" r="4.5" fill="white" opacity="0.35" />
-      <circle cx="103" cy="123" r="4.5" fill="white" opacity="0.25" />
-      <circle cx="116" cy="123" r="4.5" fill="white" opacity="0.15" />
-      {/* Header title bar */}
-      <rect x="128" y="118" width="64" height="10" rx="3" fill="white" opacity="0.2" />
+      {/* ══ TERMINAL WINDOW ══ */}
+      <rect x="50" y="100" width="240" height="150" rx="10" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+      
+      {/* Terminal Title Bar */}
+      <rect x="50" y="100" width="240" height="24" rx="10" fill="#0f172a" />
+      <rect x="50" y="114" width="240" height="10" fill="#0f172a" />
+      
+      {/* Window Controls */}
+      <circle cx="68" cy="112" r="4" fill="#ef4444" />
+      <circle cx="82" cy="112" r="4" fill="#eab308" />
+      <circle cx="96" cy="112" r="4" fill="#22c55e" />
 
-      {/* Column dividers */}
-      <line x1="138" y1="140" x2="138" y2="272" stroke="#fff5f5" strokeWidth="1" />
-      <line x1="202" y1="140" x2="202" y2="272" stroke="#fff5f5" strokeWidth="1" />
+      {/* Log Lines */}
+      {/* Info Log */}
+      <rect x="65" y="135" width="40" height="6" rx="3" fill="#3b82f6" opacity="0.8" />
+      <rect x="110" y="135" width="120" height="6" rx="3" fill="#94a3b8" opacity="0.4" />
+      {/* Error Log */}
+      <rect x="65" y="150" width="40" height="6" rx="3" fill="#ef4444" opacity="0.8" />
+      <rect x="110" y="150" width="160" height="6" rx="3" fill="#94a3b8" opacity="0.4" />
+      {/* Warn Log */}
+      <rect x="65" y="165" width="40" height="6" rx="3" fill="#eab308" opacity="0.8" />
+      <rect x="110" y="165" width="90" height="6" rx="3" fill="#94a3b8" opacity="0.4" />
+      {/* Info Log */}
+      <rect x="65" y="180" width="40" height="6" rx="3" fill="#3b82f6" opacity="0.8" />
+      <rect x="110" y="180" width="140" height="6" rx="3" fill="#94a3b8" opacity="0.4" />
+      {/* Info Log */}
+      <rect x="65" y="195" width="40" height="6" rx="3" fill="#3b82f6" opacity="0.8" />
+      <rect x="110" y="195" width="100" height="6" rx="3" fill="#94a3b8" opacity="0.4" />
 
-      {/* ── Column 1: To Do ── */}
-      {/* Col header */}
-      <circle cx="88" cy="150" r="4" fill="#94a3b8" />
-      <rect x="96" y="146" width="32" height="7" rx="2" fill="#94a3b8" opacity="0.5" />
-      {/* Card 1 */}
-      <rect x="80" y="162" width="48" height="34" rx="5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-      <rect x="86" y="169" width="36" height="5" rx="2" fill="#94a3b8" opacity="0.6" />
-      <rect x="86" y="178" width="28" height="4" rx="2" fill="#cbd5e1" opacity="0.7" />
-      <rect x="86" y="186" width="16" height="5" rx="2.5" fill="#fef2f2" />
-      <rect x="87" y="187" width="14" height="3" rx="1.5" fill="#dc2626" opacity="0.6" />
-      {/* Card 2 */}
-      <rect x="80" y="200" width="48" height="34" rx="5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-      <rect x="86" y="207" width="30" height="5" rx="2" fill="#94a3b8" opacity="0.6" />
-      <rect x="86" y="216" width="22" height="4" rx="2" fill="#cbd5e1" opacity="0.7" />
-      <rect x="86" y="224" width="16" height="5" rx="2.5" fill="#fef9c3" />
-      <rect x="87" y="225" width="14" height="3" rx="1.5" fill="#ca8a04" opacity="0.6" />
+      {/* ══ FLOATING UI ELEMENTS ══ */}
 
-      {/* ── Column 2: In Progress ── */}
-      <circle cx="152" cy="150" r="4" fill="#ef4444" />
-      <rect x="160" y="146" width="32" height="7" rx="2" fill="#ef4444" opacity="0.4" />
-      {/* Card 1 — highlighted */}
-      <rect x="144" y="162" width="48" height="36" rx="5" fill="white"
-        stroke="#ef4444" strokeWidth="1.5" />
-      <rect x="144" y="162" width="4" height="36" rx="2" fill="#ef4444" />
-      <rect x="152" y="169" width="32" height="5" rx="2" fill="#dc2626" opacity="0.55" />
-      <rect x="152" y="178" width="24" height="4" rx="2" fill="#fca5a5" opacity="0.7" />
-      <rect x="152" y="186" width="18" height="5" rx="2.5" fill="#fef2f2" />
-      <rect x="153" y="187" width="16" height="3" rx="1.5" fill="#dc2626" opacity="0.7" />
-      {/* Card 2 */}
-      <rect x="144" y="202" width="48" height="34" rx="5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-      <rect x="144" y="202" width="4" height="34" rx="2" fill="#ef4444" opacity="0.4" />
-      <rect x="152" y="209" width="36" height="5" rx="2" fill="#94a3b8" opacity="0.55" />
-      <rect x="152" y="218" width="20" height="4" rx="2" fill="#cbd5e1" opacity="0.7" />
-      <rect x="152" y="226" width="16" height="5" rx="2.5" fill="#fef2f2" />
-      <rect x="153" y="227" width="14" height="3" rx="1.5" fill="#dc2626" opacity="0.55" />
-      {/* Card 3 */}
-      <rect x="144" y="240" width="48" height="28" rx="5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-      <rect x="152" y="247" width="28" height="5" rx="2" fill="#94a3b8" opacity="0.55" />
-      <rect x="152" y="256" width="18" height="4" rx="2" fill="#cbd5e1" opacity="0.7" />
-
-      {/* ── Column 3: Done ── */}
-      <circle cx="216" cy="150" r="4" fill="#10b981" />
-      <rect x="224" y="146" width="24" height="7" rx="2" fill="#10b981" opacity="0.4" />
-      {/* Card 1 — checkmark */}
-      <rect x="208" y="162" width="48" height="34" rx="5" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" />
-      <rect x="214" y="169" width="28" height="5" rx="2" fill="#6ee7b7" opacity="0.7" />
-      <rect x="214" y="178" width="20" height="4" rx="2" fill="#a7f3d0" opacity="0.7" />
-      {/* Checkmark circle */}
-      <circle cx="247" cy="183" r="6" fill="#10b981" opacity="0.9" />
-      <path d="M244,183 L246,185 L250,181" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Card 2 */}
-      <rect x="208" y="200" width="48" height="34" rx="5" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" />
-      <rect x="214" y="207" width="32" height="5" rx="2" fill="#6ee7b7" opacity="0.6" />
-      <rect x="214" y="216" width="22" height="4" rx="2" fill="#a7f3d0" opacity="0.65" />
-      <circle cx="247" cy="221" r="6" fill="#10b981" opacity="0.75" />
-      <path d="M244,221 L246,223 L250,219" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-
-      {/* ══ FLOATING UI ELEMENTS around the board ══ */}
-
-      {/* Notification bubble — top right */}
-      <g transform="translate(280, 82)">
-        <rect x="0" y="0" width="52" height="30" rx="8" fill="white"
-          stroke="#e2e8f0" strokeWidth="1" />
-        <rect x="0" y="22" width="20" height="8" rx="0" fill="white" />
-        <polygon points="6,22 14,22 10,30" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-        <circle cx="10" cy="10" r="6" fill="#fee2e2" />
-        <rect x="5" y="8" width="1.5" height="5" rx="0.75" fill="#ef4444" />
-        <circle cx="5.75" cy="6.5" r="1" fill="#ef4444" />
-        <rect x="20" y="7" width="24" height="4" rx="2" fill="#e2e8f0" />
-        <rect x="20" y="14" width="16" height="3.5" rx="1.5" fill="#f1f5f9" />
+      {/* Floating Chart Widget (top right) */}
+      <g transform="translate(240, 70)">
+        <rect width="70" height="50" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+        <rect x="8" y="10" width="20" height="4" rx="2" fill="#cbd5e1" />
+        <path d="M10 40 L20 25 L35 30 L55 15" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <circle cx="55" cy="15" r="3" fill="#dc2626" />
+        <circle cx="35" cy="30" r="3" fill="#fca5a5" />
       </g>
 
-      {/* Progress bar widget — bottom left */}
-      <g transform="translate(28, 218)">
-        <rect x="0" y="0" width="56" height="48" rx="8" fill="white"
-          stroke="#e2e8f0" strokeWidth="1" />
-        <rect x="8" y="9" width="24" height="4" rx="2" fill="#e2e8f0" />
-        <rect x="8" y="17" width="40" height="6" rx="3" fill="#f1f5f9" />
-        <rect x="8" y="17" width="26" height="6" rx="3" fill="#ef4444" opacity="0.75" />
-        <rect x="8" y="28" width="40" height="6" rx="3" fill="#f1f5f9" />
-        <rect x="8" y="28" width="34" height="6" rx="3" fill="#10b981" opacity="0.6" />
-        <rect x="8" y="39" width="40" height="6" rx="3" fill="#f1f5f9" />
-        <rect x="8" y="39" width="18" height="6" rx="3" fill="#f59e0b" opacity="0.65" />
+      {/* Floating Error Rate Widget (bottom left) */}
+      <g transform="translate(20, 210)">
+        <rect width="80" height="40" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+        <rect x="10" y="10" width="30" height="4" rx="2" fill="#cbd5e1" />
+        <rect x="10" y="20" width="60" height="8" rx="4" fill="#fef2f2" />
+        <rect x="10" y="20" width="30" height="8" rx="4" fill="#dc2626" />
       </g>
 
-      {/* Avatar stack + label — top left */}
-      <g transform="translate(24, 96)">
-        <rect x="0" y="0" width="60" height="26" rx="7" fill="white"
-          stroke="#e2e8f0" strokeWidth="1" />
-        {[['#f87171',4],['#34d399',14],['#fb7185',24]].map(([c,x],i) => (
-          <circle key={i} cx={(x as number)+8} cy={13} r={8} fill={c as string}
-            stroke="white" strokeWidth="1.5" />
-        ))}
-        <rect x="40" y="9" width="14" height="4" rx="2" fill="#e2e8f0" />
-        <rect x="40" y="15" width="10" height="3" rx="1.5" fill="#f1f5f9" />
+      {/* Floating Alerts Widget (bottom right) */}
+      <g transform="translate(260, 200)">
+        <rect width="60" height="55" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+        <circle cx="30" cy="20" r="10" fill="#fee2e2" />
+        <path d="M30 14 v6 m0 3 v1" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" />
+        <rect x="15" y="40" width="30" height="4" rx="2" fill="#cbd5e1" />
       </g>
 
-      {/* Sprint velocity chip — bottom right */}
-      <g transform="translate(286, 256)">
-        <rect x="0" y="0" width="46" height="46" rx="10" fill="white"
-          stroke="#e2e8f0" strokeWidth="1" />
-        {/* Mini bar chart */}
-        <rect x="6"  y="28" width="6" height="12" rx="2" fill="#fca5a5" />
-        <rect x="14" y="22" width="6" height="18" rx="2" fill="#ef4444" />
-        <rect x="22" y="18" width="6" height="22" rx="2" fill="#dc2626" />
-        <rect x="30" y="24" width="6" height="16" rx="2" fill="#f87171" />
-        <rect x="6"  y="10" width="32" height="4" rx="2" fill="#f1f5f9" />
-        <rect x="6"  y="10" width="18" height="4" rx="2" fill="#fecaca" />
-      </g>
-
-      {/* Floating tag labels */}
-      <g transform="translate(64, 70)">
-        <rect x="0" y="0" width="44" height="18" rx="9" fill="#fef2f2" />
-        <rect x="8" y="6" width="28" height="6" rx="3" fill="#dc2626" opacity="0.5" />
-      </g>
-      <g transform="translate(230, 62)">
-        <rect x="0" y="0" width="52" height="18" rx="9" fill="#fef2f2" />
-        <rect x="8" y="6" width="36" height="6" rx="3" fill="#dc2626" opacity="0.45" />
-      </g>
-      <g transform="translate(36, 162)">
-        <rect x="0" y="0" width="40" height="18" rx="9" fill="#dcfce7" />
-        <rect x="8" y="6" width="24" height="6" rx="3" fill="#16a34a" opacity="0.45" />
-      </g>
-
-      {/* Connector lines from tags to board */}
-      <line x1="108" y1="79" x2="130" y2="115" stroke="#fecaca" strokeWidth="1"
-        strokeDasharray="3 3" opacity="0.6" />
-      <line x1="230" y1="71" x2="210" y2="115" stroke="#bfdbfe" strokeWidth="1"
-        strokeDasharray="3 3" opacity="0.6" />
+      {/* Simple Connection Lines */}
+      <line x1="160" y1="80" x2="240" y2="80" stroke="#fca5a5" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
+      <line x1="80" y1="210" x2="80" y2="250" stroke="#fca5a5" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
     </svg>
   );
 }
@@ -210,7 +122,7 @@ export function SigninPage() {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
       
-      router.push('/dashboard');
+      router.push('/console');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to sign in');
     } finally {
@@ -320,10 +232,10 @@ export function SigninPage() {
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#1e293b', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-                TaskFlow
+                LogOps
               </div>
               <div style={{ fontSize: 10.5, color: '#94a3b8', letterSpacing: '0.03em' }}>
-                Project Management
+                Log Monitoring
               </div>
             </div>
           </div>
@@ -336,7 +248,7 @@ export function SigninPage() {
           {/* Tagline */}
           <div style={{ textAlign: 'center', marginTop: 4 }}>
             <p style={{ fontSize: 11.5, color: '#94a3b8', lineHeight: 1.6 }}>
-              Plan, track &amp; ship — together.
+              Real-time observability and incident response.
             </p>
           </div>
         </div>

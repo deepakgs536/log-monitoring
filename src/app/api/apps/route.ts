@@ -4,9 +4,8 @@ import { getApps, createApp } from '../../../services/appService';
 export async function GET() {
     try {
         const apps = await getApps();
-        // Return apps without sensitive API keys
-        const safeApps = apps.map(({ apiKey, ...rest }) => rest);
-        return NextResponse.json(safeApps);
+        // Return apps directly to show the API keys
+        return NextResponse.json(apps);
     } catch (error) {
         console.error('Error fetching apps:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

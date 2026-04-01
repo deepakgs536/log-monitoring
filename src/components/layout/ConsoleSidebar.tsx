@@ -76,13 +76,9 @@ export const ConsoleSidebar = () => {
                     <Bell className="w-[18px] h-[18px] shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     {expanded && <span className="text-[13px] font-medium">Notifications</span>}
                 </button>
-                <button className={`w-full flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group`}>
-                    <Settings className="w-[18px] h-[18px] shrink-0 group-hover:rotate-90 transition-transform duration-500" />
-                    {expanded && <span className="text-[13px] font-medium">Settings</span>}
-                </button>
 
                 {/* Profile */}
-                <div className={`flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-xl hover:bg-red-50/30 cursor-pointer transition-all duration-300 group`}>
+                <Link href="/settings" className={`flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-xl hover:bg-red-50/30 cursor-pointer transition-all duration-300 group`}>
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-red-200/40 shrink-0 group-hover:shadow-red-300/50 group-hover:scale-105 transition-all duration-300">
                         DS
                     </div>
@@ -92,7 +88,7 @@ export const ConsoleSidebar = () => {
                             <p className="text-[10px] text-gray-400 truncate">Admin</p>
                         </div>
                     )}
-                </div>
+                </Link>
             </div>
         </div>
     );
