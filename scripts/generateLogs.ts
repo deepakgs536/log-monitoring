@@ -37,7 +37,7 @@ const API_URL = 'http://localhost:3000/api/logs';
 const argss = process.argv.slice(2);
 const getArg = (name: string) => {
     const arg = argss.find(a => a.startsWith(`--${name}=`));
-    return arg ? arg.split('=')[1] : null;
+    return arg ? arg.substring(`--${name}=`.length) : null;
 };
 
 const apiKey = getArg('api-key');
@@ -49,10 +49,11 @@ const countArg = getArg('count');
 
 const BATCH_SIZE = batchSizeArg ? parseInt(batchSizeArg, 10) : 10;
 let TOTAL_BATCHES = totalBatchesArg ? parseInt(totalBatchesArg, 10) : 100;
+let TARGET_COUNT = 0;
 
 if (countArg) {
-    const count = parseInt(countArg, 10);
-    TOTAL_BATCHES = Math.ceil(count / BATCH_SIZE);
+    TARGET_COUNT = parseInt(countArg, 10);
+    TOTAL_BATCHES = Math.ceil(TARGET_COUNT / BATCH_SIZE);
 }
 
 const INTERVAL_MS = intervalArg ? parseInt(intervalArg, 10) : 1000;
@@ -98,7 +99,8 @@ async function run() {
         if (count >= TOTAL_BATCHES) {
             return false;
         }
-        const batch = generateBatch(BATCH_SIZE);
+        const currentBatchSize = TARGET_COUNT ? Math.min(BATCH_SIZE, TARGET_COUNT - (count * BATCH_SIZE)) : BATCH_SIZE;
+        const batch = generateBatch(currentBatchSize);
         await sendBatch(batch);
         count++;
         return true;
@@ -110,13 +112,16 @@ async function run() {
         return;
     }
 
-    const interval = setInterval(async () => {
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    while (true) {
+        await sleep(INTERVAL_MS);
         const more = await executeBatch();
         if (!more) {
-            clearInterval(interval);
             console.log('Done sending batches.');
+            break;
         }
-    }, INTERVAL_MS);
+    }
 }
 
 run();

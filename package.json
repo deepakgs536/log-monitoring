@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "log-gen": "npx tsx scripts/generateLogs.ts --app-id=default --batch-size=25 --interval=500 --batches=2000",
+    "dev:next": "next dev",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"Nextjs,Logger\" -c \"cyan.bold,yellow.bold\" \"npm run dev:next\" \"npm run log-gen\"",
     "build": "next build",
-    "start": "next start",
+    "start:next": "next start",
+    "start": "concurrently -k -p \"[{name}]\" -n \"Nextjs,Logger\" -c \"cyan.bold,yellow.bold\" \"npm run start:next\" \"npm run log-gen\"",
     "lint": "eslint"
   },
   "dependencies": {
@@ -36,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/recharts": "^1.8.29",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
