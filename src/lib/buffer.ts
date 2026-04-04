@@ -10,7 +10,16 @@ const buffers: Map<string, Log[]> = new Map();
 declare global {
     // eslint-disable-next-line no-var
     var flushTimer: NodeJS.Timeout | null;
+    // eslint-disable-next-line no-var
+    var volatileHistoryCache: Map<string, Log[]> | undefined;
 }
+
+// Volatile bounded history buffer for stats aggregation (max 2000 logs per app)
+export const volatileHistory: Map<string, Log[]> = global.volatileHistoryCache || new Map();
+if (!global.volatileHistoryCache) {
+    global.volatileHistoryCache = volatileHistory;
+}
+const MAX_HISTORY = 2000;
 
 if (typeof global.flushTimer === 'undefined') {
     global.flushTimer = null;
@@ -23,6 +32,15 @@ export function push(appId: string, log: Log): void {
 
     const buffer = buffers.get(appId)!;
     buffer.push(log);
+    
+    if (!volatileHistory.has(appId)) {
+        volatileHistory.set(appId, []);
+    }
+    const history = volatileHistory.get(appId)!;
+    history.push(log);
+    if (history.length > MAX_HISTORY) {
+        history.shift(); // Keep only the latest 2000 logs in memory
+    }
 
     if (buffer.length >= FLUSH_THRESHOLD) {
         flushApp(appId);

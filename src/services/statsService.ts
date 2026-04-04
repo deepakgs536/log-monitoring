@@ -1,8 +1,8 @@
-
-import fs from 'fs/promises';
+// Volatile mode: fs module removed
 import path from 'path';
 import { Log, Alert, DashboardMetrics, LogStats, TimeRange, SystemMetrics, SimulationScenario } from '../lib/types';
 import { TIME_RANGES, SIMULATION_SCENARIOS } from '../lib/constants';
+import { volatileHistory } from '../lib/buffer';
 
 const STORAGE_DIR = path.join(process.cwd(), 'storage');
 
@@ -69,28 +69,12 @@ function getGranularity(range: TimeRange): number {
 }
 
 async function saveAlert(appId: string, alert: Alert) {
-    try {
-        const appOpsDir = path.join(STORAGE_DIR, appId);
-        await fs.mkdir(appOpsDir, { recursive: true });
-        const alertFile = path.join(appOpsDir, 'alerts.ndjson');
-        await fs.appendFile(alertFile, JSON.stringify(alert) + '\n');
-    } catch (e) {
-        console.error(`Failed to save alert for app ${appId}:`, e);
-    }
+    // Volatile mode: no disk IO
 }
 
 async function getRecentAlerts(appId: string, limit: number = 10): Promise<Alert[]> {
-    try {
-        const alertFile = path.join(STORAGE_DIR, appId, 'alerts.ndjson');
-        const content = await fs.readFile(alertFile, 'utf-8');
-        return content.trim().split('\n')
-            .filter(Boolean)
-            .map(line => JSON.parse(line))
-            .slice(-limit)
-            .reverse();
-    } catch (e) {
-        return [];
-    }
+    // Volatile mode: no disk IO
+    return [];
 }
 
 let currentScenario: SimulationScenario = 'normal';
@@ -256,43 +240,14 @@ async function detectAnomalies(appId: string, logs: Log[], windowMs: number): Pr
 
 export async function getLogStats(appId: string, timeRange: TimeRange = '1h'): Promise<LogStats> {
     try {
-        const logFile = path.join(STORAGE_DIR, appId, 'logs.ndjson');
-
-        // Check availability strictly for stats to avoid throwing
-        try {
-            await fs.access(logFile);
-        } catch {
-            return {
-                distribution: [],
-                serviceDistribution: [],
-                timeline: [],
-                total: 0,
-                recentLogs: [],
-                metrics: { logsPerSecond: 0, errorRate: 0, avgLatency: 0, healthScore: 100 },
-                system: generateSystemMetrics(0),
-                alerts: []
-            };
-        }
-
-        const fileContent = await fs.readFile(logFile, 'utf-8');
-        const lines = fileContent.trim().split('\n');
-
         const now = Date.now();
         const rangeMs = getTimeRangeMs(timeRange);
         const cutoffTime = now - rangeMs;
         const granularity = getGranularity(timeRange);
 
-        const allLogs: Log[] = [];
-        for (const line of lines) {
-            try {
-                if (line.trim()) {
-                    const log = JSON.parse(line);
-                    if (log.timestamp >= cutoffTime) {
-                        allLogs.push(log);
-                    }
-                }
-            } catch (e) { }
-        }
+        // Volatile Mode: We load historical logs from the in-memory ring buffer.
+        // The dashboard timeline will aggregate over our recent stream array.
+        const allLogs: Log[] = volatileHistory.get(appId) || [];
 
         const windowMs = 30000;
         const metricLogs = allLogs.filter(l => l.timestamp >= now - windowMs);
