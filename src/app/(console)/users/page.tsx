@@ -6,8 +6,9 @@ import { User, UserPlus, UserMinus, ShieldAlert, Check, AlertCircle, Mail, Key }
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const getAvatarGradient = (name: string) => {
-    const chars = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
+const getAvatarGradient = (name?: string) => {
+    const safeName = name || 'User';
+    const chars = safeName.charCodeAt(0) + (safeName.charCodeAt(1) || 0);
     const gradients = [
         'from-red-500 to-orange-500',
         'from-rose-500 to-pink-600',
@@ -180,7 +181,7 @@ export default function UsersPage() {
                                             {/* User Details */}
                                             <div className="col-span-8 md:col-span-5 flex items-center gap-4">
                                                 <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${getAvatarGradient(user.name)} flex items-center justify-center text-white font-bold shadow-md transform group-hover:scale-105 group-hover:-rotate-3 transition-all duration-300`}>
-                                                    {user.name.substring(0, 2).toUpperCase()}
+                                                    {(user.name || 'U').substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="font-bold text-slate-900 text-[15px] flex items-center gap-2 truncate">
