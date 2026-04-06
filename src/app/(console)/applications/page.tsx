@@ -4,15 +4,15 @@ import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '@/context/AppContext';
 import { Application } from '@/lib/types';
-import { Trash2, Eye, EyeOff, Edit2, Check, X, Search, Copy, Terminal, Plus, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { Trash2, Eye, EyeOff, Edit2, Check, X, Search, Copy, Terminal, Plus, ArrowRight, Users } from 'lucide-react';
 
 export default function ApplicationsPage() {
-    const { apps, updateApp, deleteApp, isLoading, currentApp, switchApp, createApp } = useApp();
+    const { apps, updateApp, deleteApp, isLoading, currentApp, switchApp, createApp, currentUser } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+    const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
 
     // Create Modal State
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -47,6 +47,11 @@ export default function ApplicationsPage() {
         app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const myApps = filteredApps.filter(a => !a.ownerId || a.ownerId === currentUser?.userId);
+    const sharedApps = filteredApps.filter(a => a.ownerId && a.ownerId !== currentUser?.userId);
+
+    const displayApps = activeTab === 'me' ? myApps : sharedApps;
 
     const toggleKeyVisibility = (id: string) => {
         const newSet = new Set(visibleKeys);
@@ -90,7 +95,6 @@ export default function ApplicationsPage() {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        // Optional: show toast
     };
 
     if (isLoading) {
@@ -107,7 +111,7 @@ export default function ApplicationsPage() {
                 <div className="max-w-7xl mx-auto space-y-6">
 
                     {/* Compact Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-gray-200">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-gray-200">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                                 Applications
@@ -139,10 +143,42 @@ export default function ApplicationsPage() {
                         </div>
                     </div>
 
-                    {/* Ultra-Compact Technical Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+                    {/* Tabs */}
+                    <div className="flex items-center space-x-6 border-b border-gray-200">
+                        <button
+                            onClick={() => setActiveTab('me')}
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+                                activeTab === 'me'
+                                    ? 'border-red-600 text-red-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            My Apps ({myApps.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('others')}
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+                                activeTab === 'others'
+                                    ? 'border-red-600 text-red-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            <Users className="w-4 h-4" />
+                            Shared With Me ({sharedApps.length})
+                        </button>
+                    </div>
 
-                        {filteredApps.map(app => (
+                    {/* Ultra-Compact Technical Grid */}
+                    {displayApps.length === 0 ? (
+                        <div className="text-center py-10">
+                            <p className="text-gray-500 text-sm">No applications found in this category.</p>
+                        </div>
+                    ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+                        {displayApps.map(app => {
+                            const isOwner = !app.ownerId || app.ownerId === currentUser?.userId;
+
+                            return (
                             <div
                                 key={app.id}
                                 className={`group relative bg-white rounded-xl border transition-all duration-300 flex flex-col h-[170px] overflow-hidden ${currentApp?.id === app.id
@@ -161,7 +197,7 @@ export default function ApplicationsPage() {
                                                 <Terminal className={`w-4 h-4 ${currentApp?.id === app.id ? 'text-red-600' : 'text-gray-400 group-hover:text-red-500'}`} />
                                             </div>
                                             <div className="min-w-0">
-                                                {editingId === app.id ? (
+                                                {editingId === app.id && isOwner ? (
                                                     <div className="flex items-center gap-1">
                                                         <input
                                                             autoFocus
@@ -175,12 +211,12 @@ export default function ApplicationsPage() {
                                                 ) : (
                                                     <div className="group/edit">
                                                         <h3
-                                                            className="font-bold text-gray-900 text-sm leading-tight cursor-pointer hover:text-red-600 transition-colors flex items-center gap-2"
-                                                            onClick={() => startEditing(app)}
+                                                            className={`font-bold text-gray-900 text-sm leading-tight flex items-center gap-2 ${isOwner ? 'cursor-pointer hover:text-red-600 transition-colors' : ''}`}
+                                                            onClick={() => isOwner && startEditing(app)}
                                                             title={app.name}
                                                         >
                                                             <span className="truncate max-w-[120px]">{app.name}</span>
-                                                            <Edit2 className="w-3 h-3 text-gray-300 opacity-0 group-hover/edit:opacity-100 transition-opacity" />
+                                                            {isOwner && <Edit2 className="w-3 h-3 text-gray-300 opacity-0 group-hover/edit:opacity-100 transition-opacity" />}
                                                         </h3>
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             <span className={`text-[9px] font-bold px-1 py-px rounded border ${currentApp?.id === app.id
@@ -195,16 +231,19 @@ export default function ApplicationsPage() {
                                             </div>
                                         </div>
 
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); initiateDelete(app); }}
-                                            className="text-gray-300 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        {isOwner && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); initiateDelete(app); }}
+                                                className="text-gray-300 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Key Section - One Line Compact */}
                                     <div className="mb-auto">
+                                        {isOwner ? (
                                         <div
                                             className="bg-gray-50 border border-gray-200 group-hover:border-red-200/50 rounded-md px-2.5 py-1.5 flex items-center justify-between gap-2 transition-colors h-[34px]"
                                         >
@@ -228,6 +267,11 @@ export default function ApplicationsPage() {
                                                 </button>
                                             </div>
                                         </div>
+                                        ) : (
+                                        <div className="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 flex items-center justify-center h-[34px] text-xs text-gray-400 font-medium italic">
+                                            Shared Application
+                                        </div> 
+                                        )}
                                     </div>
 
                                     {/* Action - Integrated into bottom */}
@@ -249,8 +293,9 @@ export default function ApplicationsPage() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
+                    )}
                 </div>
             </div>
 

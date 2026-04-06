@@ -10,6 +10,8 @@ const ApplicationSchema: Schema = new Schema({
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     apiKey: { type: String, required: false },
+    ownerId: { type: String, required: false },
+    guestIds: { type: [String], default: [] },
     createdAt: { type: Number, required: true, default: Date.now }
 }, { 
     timestamps: false,

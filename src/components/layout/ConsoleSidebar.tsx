@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS } from '@/lib/constants';
 import { Terminal, User, ChevronLeft, ChevronRight, Settings, Bell } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppSelector from './AppSelector';
+import { useApp } from '@/context/AppContext';
 
 export const ConsoleSidebar = () => {
     const pathname = usePathname();
     const currentPath = pathname || '/';
     const [expanded, setExpanded] = useState(true);
+    const { currentApp, currentUser } = useApp();
 
     return (
         <div
@@ -48,8 +50,8 @@ export const ConsoleSidebar = () => {
                     const isActive = currentPath.startsWith(item.path);
                     const Icon = item.icon;
                     return (
+                        <React.Fragment key={item.path}>
                         <Link
-                            key={item.path}
                             href={item.path}
                             className={`group relative flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-xl transition-all duration-300 ${isActive
                                 ? 'bg-gradient-to-r from-red-50 to-rose-50/60 text-red-600 shadow-sm shadow-red-100/30 border border-red-100/50'
@@ -66,6 +68,7 @@ export const ConsoleSidebar = () => {
                                 </span>
                             )}
                         </Link>
+                        </React.Fragment>
                     );
                 })}
             </nav>

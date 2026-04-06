@@ -1,20 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getApp, updateApp, deleteApp } from '../../../../services/appService';
+import { getCurrentUserFromToken } from '@/lib/auth';
 
 export async function GET(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const token = request.cookies.get('token')?.value;
+        const user = getCurrentUserFromToken(token);
         const { id } = await params;
         const app = await getApp(id);
         if (!app) {
             return NextResponse.json({ error: 'App not found' }, { status: 404 });
         }
 
-        // Return app without sensitive API key
+        // Only return API key if the user is the owner
+        const isOwner = user && app.ownerId === user.userId;
         const { apiKey, ...safeApp } = app;
-        return NextResponse.json(safeApp);
+        
+        if (isOwner || !app.ownerId) {
+            return NextResponse.json(app);
+        } else {
+            return NextResponse.json(safeApp);
+        }
     } catch (error) {
         console.error('Error fetching app:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -22,10 +31,14 @@ export async function GET(
 }
 
 export async function PATCH(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const token = request.cookies.get('token')?.value;
+        const user = getCurrentUserFromToken(token);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const { id } = await params;
         const body = await request.json();
         const { name } = body;
@@ -34,9 +47,9 @@ export async function PATCH(
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
-        const updatedApp = await updateApp(id, name);
+        const updatedApp = await updateApp(id, name, user.userId);
         if (!updatedApp) {
-            return NextResponse.json({ error: 'App not found' }, { status: 404 });
+            return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 });
         }
 
         return NextResponse.json(updatedApp);
@@ -47,14 +60,18 @@ export async function PATCH(
 }
 
 export async function DELETE(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const token = request.cookies.get('token')?.value;
+        const user = getCurrentUserFromToken(token);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const { id } = await params;
-        const success = await deleteApp(id);
+        const success = await deleteApp(id, user.userId);
         if (!success) {
-            return NextResponse.json({ error: 'App not found' }, { status: 404 });
+            return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 });
         }
 
         return NextResponse.json({ success: true });

@@ -35,6 +35,13 @@ export async function POST(request: Request) {
         const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // This removes the duplicate key error if an old text/username index exists
+        try {
+            await User.collection.dropIndex('username_1');
+        } catch (e) {
+            // Ignore if index doesn't exist
+        }
+
         const user = await User.create({
             name,
             email: email.toLowerCase(),

@@ -4,6 +4,8 @@ export interface Application {
     id: string;
     name: string;
     apiKey?: string;
+    ownerId?: string;
+    guestIds?: string[];
     createdAt: number;
 }
 

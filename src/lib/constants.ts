@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Terminal, BarChart2, Settings, TrendingUp, ShieldAlert, Zap, LayoutDashboard, FileText, Hexagon } from 'lucide-react';
+import { Activity, AlertTriangle, Terminal, BarChart2, Settings, TrendingUp, ShieldAlert, Zap, LayoutDashboard, FileText, Hexagon, User } from 'lucide-react';
 
 export const THEME = {
     // Base Palette - Core Neutral System
@@ -57,6 +57,7 @@ export const NAV_ITEMS = [
     { label: 'Logs', path: '/logs', icon: Terminal },
     // { label: 'Analytics', path: '/analytics', icon: BarChart2 },
     { label: 'Applications', path: '/applications', icon: LayoutDashboard },
+    { label: 'Users', path: '/users', icon: User },
 ];
 
 export const SIMULATION_SCENARIOS = [
