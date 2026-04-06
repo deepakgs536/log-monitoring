@@ -10,10 +10,10 @@ The system mimics a real-world microservice architecture:
 |-----------|------|----------------|
 | **API** | `/app/api/logs/route.ts` | Entry point for log ingestion. Accepts JSON batches. |
 | **Pipeline Core** | `/services/ingestionService.ts` | Orchestrates validation and buffering. |
-| **Buffer** | `/lib/buffer.ts` | In-memory queue. Flushes every 100 logs or 2 seconds. |
+| **Buffer** | `/lib/buffer.ts` | In-memory `volatileHistory` bounded queue (max 2000 logs). |
 | **Validator** | `/lib/validator.ts` | Enforces schema and type safety. |
-| **Writer** | `/lib/writer.ts` | Appends flushed batches to `storage/logs.ndjson`. |
-| **Storage** | `/storage/` | Local persistence layer (NDJSON format). |
+| **Writer** | `/lib/writer.ts` | Volatile mode. Disk write disabled for Serverless environments. |
+| **Database** | `MongoDB` | Persistent storage for App Configurations and API Keys. |
 
 ## 🚀 Log Schema
 
@@ -33,7 +33,12 @@ Logs follow a structured JSON format optimized for observability:
 ## 🛠 Usage
 
 ### 1. Start the Server
-First, run the development server:
+First, configure your `.env` file with a valid MongoDB URI containing your app config:
+```env
+CONNECTION_STRING="mongodb+srv://...your-cluster..."
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -91,7 +96,7 @@ Navigate to the **Applications** page in the Console to manage them.
 
 ## ⚡ Performance Features
 
-- **Non-blocking I/O**: The API responds immediately after buffering; file writes happen in the background.
-- **Batching**: Reduces disk I/O syscalls by writing in chunks.
-- **Validation**: Ensures no malformed data corrupts the storage.
-- **Graceful Buffering**: Auto-flushes based on size (100 logs) or time (2s).
+- **Non-blocking I/O**: The API responds immediately upon queuing logs.
+- **Volatile Execution**: Log broadcasting avoids read-only filesystem limitations present on serverless hosting (Vercel).
+- **Validation**: Ensures no malformed data corrupts the frontend stream distributions.
+- **Graceful Buffering**: Memory-bounded ring-buffer retaining exactly the latest 2000 metrics logs.

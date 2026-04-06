@@ -4,28 +4,25 @@ This document describes how data moves through the Log Monitoring Application, f
 
 ## Architecture Overview
 
-The system follows a uni-directional data flow for ingestion, with separate read paths for real-time streaming and historical analysis.
+The system follows a volatile, near-real-time data flow for ingestion designed to be compatible with Serverless environments (like Vercel). Persistent storage is exclusively used for core application configurations.
 
 ```mermaid
 graph TD
     Client[Client App / Log Agent] -->|POST /api/logs| API[Ingestion API]
     
+    subgraph Config Layer
+        API -->|Validate API Key| MongoDB[(MongoDB - App Config)]
+    end
+    
     subgraph Ingestion Pipeline
         API -->|Validate Batch| Ingest[Ingestion Service]
-        Ingest -->|Process| Buffer[Memory Buffer]
+        Ingest -->|Process| Buffer[Volatile In-Memory Buffer]
         Ingest -->|Emit 'logs'| Socket[Socket.IO Server]
     end
     
-    subgraph Storage Layer
-        Buffer -->|Flush (Time/Size)| Writer[Log Writer]
-        Writer -->|Append| Storage[(storage/logs.ndjson)]
-        StatsService -->|Save Alert| AlertStore[(storage/alerts.ndjson)]
-    end
-    
     subgraph Read & Analysis
-        StatsService[Stats Service] -->|Read & Aggregate| Storage
-        StatsService -->|Read History| AlertStore
-        LogReader[Log Reader Service] -->|Query & Filter| Storage
+        StatsService[Stats Service] -->|Read & Aggregate| Buffer
+        LogReader[Log Reader Service] -->|Real-time stream only| Buffer
     end
     
     subgraph Dashboard UI
@@ -33,49 +30,41 @@ graph TD
         Socket -->|Real-time Events| Browser
         Browser -->|GET /api/stats| StatsService
         Browser -->|POST /api/logs/search| LogReader
-        Browser -->|GET /api/reports/*| Exports[Export API]
     end
-    
-    Exports -->|Generate CSV/JSON| LogReader
-    Exports -->|Generate Snapshot| StatsService
 ```
 
 ## Detailed Flow Components
 
-### 1. Log Ingestion
+### 1. Application Configuration
+- **Mechanism**: MongoDB
+- **Purpose**: Stores application data including identifiers and API Keys necessary for authentication when ingesting external logs.
+
+### 2. Log Ingestion
 - **EntryPoint**: `POST /api/logs`
-- **Processing**: `src/services/ingestionService.ts` receives batches of logs.
-- **Validation**: Each log is validated against the `Log` schema.
-- **Buffering**: Valid logs are pushed to an in-memory `buffer` (`src/lib/buffer.ts`).
-- **Persistence**: The buffer potentially flushes to disk (`src/lib/writer.ts`) when it reaches a size threshold (100 logs) or time interval (2s).
-- **Target**: Logs are appended to `storage/logs.ndjson` in NDJSON format.
+- **Authentication**: API Key validation against the `AppModel` stored in MongoDB.
+- **Processing**: `src/services/ingestionService.ts` receives log batches.
+- **Validation**: Each log is validated strictly against the predefined `Log` schema.
+- **Buffering**: Valid logs are pushed to an in-memory `volatileHistory` buffer (`src/lib/buffer.ts`), bounded to the latest 2000 logs per application constraint to preserve memory. Disk persistence (e.g. NDJSON writes) has been completely removed to avoid `read-only` file system constraints in Serverless deployments (e.g., on Vercel).
 
-### 2. Real-time Streaming
+### 3. Real-time Streaming
 - **Mechanism**: Socket.IO
-- **Trigger**: Immediately upon successful ingestion of a log batch.
+- **Trigger**: Emitted immediately upon successful ingestion and validation of a log batch.
 - **Pathway**: `ingestionService` -> `socket.ts` -> Emit `logs` event -> Connected Clients.
-- **Latency**: Near real-time (<50ms processing time usually).
+- **Latency**: Near real-time (instantaneous WebSocket pushes).
 
-### 3. Data Retrieval & Analysis
+### 4. Data Retrieval & Analysis
 - **Stats API**: `GET /api/stats`
     - **Service**: `src/services/statsService.ts`
-    - **Operation**: Reads the raw `logs.ndjson` file.
+    - **Operation**: Periodically reads historical segments from the `volatileHistory` in-memory ring-buffer.
     - **Processing**:
-        - Filters logs by requested time range.
-        - Aggregates metrics (Logs/sec, Error Rate, Latency).
-        - Generates histograms (Timeline) and distributions (Service/Level).
-        - **Anomaly Detection**: Runs heuristics on recent logs to detect spikes or error bursts.
-        - **Alerts**: New alerts are computed and persisted to `storage/alerts.ndjson`.
+        - Filters logs based on the requested time range bounds available in memory.
+        - Aggregates metrics (Logs/sec, Error Rate, Avg Latency).
+        - Generates distribution patterns (Timeline, Service and Level charts).
+        - **Anomaly Detection**: Runs heuristics entirely on the in-memory window to detect traffic spikes or error burst intervals and synthesize system alerts.
 - **Log Explorer**: `POST /api/logs/search`
     - **Service**: `src/lib/logReader.ts`
-    - **Operation**: Efficiently reads `logs.ndjson` (reverse chronological).
-    - **Filtering**: Applies stream-based filtering for Service, Level, Search Text, and Time Range.
-
-### 4. Exports
-- **Logs (CSV)**: `POST /api/reports/logs` -> Uses `logReader` to fetch filtered logs -> Converts to CSV stream.
-- **Incidents (JSON)**: `GET /api/reports/incidents` -> Uses `statsService` to fetch active alerts from `alerts.ndjson`.
-- **Summary**: `GET /api/reports/summary` -> Snapshots the current `stats` object.
+    - **Operation**: Operates in volatile mode, heavily deferring and prioritizing active viewing to live stream ingestion transmitted by Socket.IO directly to the frontend.
 
 ## Storage Schema
-- **Logs**: NDJSON (Newline Delimited JSON). Each line is a valid JSON object matching the `Log` interface.
-- **Alerts**: NDJSON. Stores generated alerts with metadata.
+- **Applications**: Stored persistently in **MongoDB**, using Mongoose schemas.
+- **Logs**: **Volatile (In-Memory)** limits recent history to 2000 logs maximum per app to cap memory usage dynamics. Storage to disk is disabled.
